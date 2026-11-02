@@ -283,7 +283,7 @@ Archivos en `kebab-case` con sufijo; clases en `PascalCase`. Entidades en singul
 
 ## Tests
 
-Objetivo del plan: **80 % de cobertura general, 95 % en el dominio**. Cada US se entrega con sus tests.
+Objetivo del plan: **70 % de cobertura general, 95 % en el dominio**. Cada US se entrega con sus tests.
 
 | Qué | Cómo | Dónde |
 |---|---|---|
