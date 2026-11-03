@@ -7,7 +7,7 @@ import { UsuarioResponseDto } from '../../../usuario/dto/usuario-response.dto';
 import { IngresarDto } from '../../dto/ingresar.dto';
 import { GeneradorToken } from '../../generador-token';
 
-// US-02: verifica las credenciales → pide el access token al GeneradorToken
+// US-02: verifica las credenciales → pide el access token y el refresh token al GeneradorToken
 @Injectable()
 export class IngresarUseCase {
   constructor(
@@ -17,9 +17,11 @@ export class IngresarUseCase {
     private readonly generadorToken: GeneradorToken,
   ) {}
 
-  async execute(
-    dto: IngresarDto,
-  ): Promise<{ access_token: string; usuario: UsuarioResponseDto }> {
+  async execute(dto: IngresarDto): Promise<{
+    access_token: string;
+    refresh_token: string;
+    usuario: UsuarioResponseDto;
+  }> {
     const usuario = await this.usuarioRepository.buscarPorEmail(dto.email);
 
     const contrasenaValida =
@@ -31,9 +33,8 @@ export class IngresarUseCase {
       throw new UnauthorizedException('Email o contraseña incorrectos.');
     }
 
-    return {
-      access_token: await this.generadorToken.generarToken(usuario),
-      usuario: UsuarioMapper.aDto(usuario),
-    };
+    const tokens = await this.generadorToken.generarTokens(usuario);
+
+    return { ...tokens, usuario: UsuarioMapper.aDto(usuario) };
   }
 }

@@ -7,6 +7,7 @@ import {
   Logger,
 } from '@nestjs/common';
 import { Request, Response } from 'express';
+import { DomainException } from '../exceptions/domain-exceptions';
 
 // Convierte cualquier error al formato del contrato (paso 11): { "error": "mensaje legible" }
 @Catch()
@@ -17,6 +18,16 @@ export class GlobalExceptionFilter implements ExceptionFilter {
     const context = host.switchToHttp();
     const response = context.getResponse<Response>();
     const request = context.getRequest<Request>();
+
+
+// Errores de dominio: los que lanzamos nosotros (DomainException). Por ejemplo, cuando un usuario intenta registrarse con un email que ya existe, 
+// lanzamos un DomainException con el mensaje "El email ya está registrado". Este error se traduce a un 422 Unprocessable Entity y se devuelve al cliente con el mensaje legible.
+    if (exception instanceof DomainException) {
+      response
+        .status(HttpStatus.UNPROCESSABLE_ENTITY)
+        .json({ error: exception.message });
+      return;
+    }
 
     // Errores conocidos: los que lanzamos nosotros (NotFound, Conflict, etc.) y los del ValidationPipe
     if (exception instanceof HttpException) {
