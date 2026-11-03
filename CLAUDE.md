@@ -189,7 +189,7 @@ export class RegistrarSerieUseCase {
 | Refresh token (`POST /api/auth/refresh`) | `gestion-usuario/auth/` | Capuano |
 | `@UsuarioActual()` → `{ id, rol }` | `gestion-usuario/auth/usuario-actual.decorator.ts` | Capuano |
 | `DomainException` + que el filtro la responda con 422 | `common/exceptions/`, `common/filters/` | Capuano |
-| `hoy()` y comparación de fechas | `common/helpers/fecha.ts` | Capuano |
+| `fechaActual()` | `common/helpers/fecha-actual.ts` | Capuano |
 | Instalar y configurar `@nestjs/event-emitter` | `app.module.ts` | Bernardi (primer evento: `PlanCreado`) |
 | Repositorios en memoria base | `test/repositorios-en-memoria/` | cada dueño crea el de su agregado junto con su interfaz |
 
@@ -314,4 +314,4 @@ yarn build
 ## Base de datos
 
 - `synchronize: true` en desarrollo: las tablas se crean desde las entidades. No hay migraciones todavía; **no usar `synchronize` en producción**.
-- Variables en `.env` (nunca se commitea): `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `DB_SSL`, `JWT_SECRET`. MySQL local con `docker-compose.yml`.
+- Variables en `.env` (nunca se commitea): `DB_HOST`, `DB_PORT`, `DB_USERNAME`, `DB_PASSWORD`, `DB_DATABASE`, `DB_SSL`, `JWT_SECRET`, `JWT_REFRESH_SECRET`, `JWT_REFRESH_EXPIRATION`. MySQL local con `docker-compose.yml`.
