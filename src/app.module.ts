@@ -5,6 +5,7 @@ import { AuthModule } from './modules/gestion-usuario/auth/auth.module';
 import { UsuarioModule } from './modules/gestion-usuario/usuario/usuario.module';
 import { RolModule } from './modules/gestion-usuario/rol/rol.module';
 import { CatalogoModule } from './modules/catalogo/catalogo.module';
+import { MedicionesModule } from './modules/mediciones/mediciones.module';
 
 @Module({
   imports: [
@@ -19,7 +20,6 @@ import { CatalogoModule } from './modules/catalogo/catalogo.module';
       password: process.env.DB_PASSWORD,
       database: process.env.DB_DATABASE,
       timezone: '-03:00',
-
       // Las entidades se registran automáticamente cuando usás
       // TypeOrmModule.forFeature([Entidad]) en tus módulos
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
@@ -30,6 +30,7 @@ import { CatalogoModule } from './modules/catalogo/catalogo.module';
     UsuarioModule,
     RolModule,
     CatalogoModule,
+    MedicionesModule,
   ],
 })
 export class AppModule {}
