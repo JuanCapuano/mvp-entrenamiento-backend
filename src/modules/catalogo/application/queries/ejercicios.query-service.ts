@@ -25,10 +25,16 @@ export class EjerciciosQueryService {
         grupoMuscular: query.grupo_muscular,
       });
     }
-    //si el parámetro grupo_muscular no está presente, se omite la condición y se devuelven todos los ejercicios sin filtrar por grupo muscular pero si ordenados.
+    if (query.subgrupo) {
+      qb.andWhere('ejercicio.subgrupo = :subgrupo', {
+        subgrupo: query.subgrupo,
+      });
+    }
+    //si los parámetros no están presentes, se omiten las condiciones y se devuelven todos los ejercicios sin filtrar pero si ordenados.
 
     const ejercicios = await qb
-      .orderBy('ejercicio.grupoMuscular', 'ASC') //ordena los ejercicios primero por grupo muscular en orden ascendente y luego por nombre en orden ascendente.
+      .orderBy('ejercicio.grupoMuscular', 'ASC') //ordena los ejercicios primero por grupo muscular, luego por subgrupo y luego por nombre, todo en orden ascendente.
+      .addOrderBy('ejercicio.subgrupo', 'ASC')
       .addOrderBy('ejercicio.nombre', 'ASC')
       .getMany(); //getMany() ejecuta la consulta y devuelve un array de entidades Ejercicio que cumplen con los criterios de búsqueda y ordenamiento especificados.
 

@@ -7,6 +7,7 @@ export class EjercicioMapper {
       id: ejercicio.id,
       nombre: ejercicio.nombre,
       grupo_muscular: ejercicio.grupoMuscular,
+      subgrupo: ejercicio.subgrupo,
     };
   }
 }

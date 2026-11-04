@@ -258,8 +258,9 @@ Archivos en `kebab-case` con sufijo; clases en `PascalCase`. Entidades en singul
 
 ### `catalogo` — ejercicios precargados (✅ hecho)
 - Sin comandos: el catálogo viene por seed y el entrenador no agrega ejercicios.
-- `Ejercicio` (nombre + `GrupoMuscular`: MMII, MMSS, CORE). Repo: `buscarPorId`, `existe`.
-- `GET /api/ejercicios?grupo_muscular`.
+- `Ejercicio` (nombre + `GrupoMuscular`: PIERNA, PECHO, ESPALDA, HOMBRO, BRAZO, CORE + `Subgrupo` opcional: CUADRICEPS, FEMORAL, GLUTEO, GEMELOS, DORSALES, TRAPECIO, BICEPS, TRICEPS). Repo: `buscarPorId`, `existe`.
+- El seed identifica los ejercicios por nombre: inserta los que faltan y reclasifica (grupo y subgrupo) los que ya existen.
+- `GET /api/ejercicios?grupo_muscular&subgrupo`.
 
 ### `gestion-usuario` — `auth/`, `rol/`, `usuario/`
 - ✅ `auth/`: `CrearCuentaUseCase`, `IngresarUseCase`, `GeneradorToken`, `AuthGuard` global, `@Public()`, `@Roles(...)`, payload JWT `{ sub, rol }`. Falta el refresh.
