@@ -148,7 +148,9 @@ La sesión de entrenamiento dice qué rutina se hizo ese día y cada serie dice 
 | Plan vigente | Plan que el deportista está siguiendo: la fecha actual está dentro de su vigencia. | Plan asignado anterior |
 | Indicaciones generales | Pautas del plan que no se registran ni se calculan: entrada en calor, pausas micro y macro, velocidad de ejecución, elongación. | Dosificación |
 | Rutina | Parte del plan que se hace en una misma sesión de entrenamiento . | Plan de entrenamiento, Sesión de entrenamiento |
-| Ejercicio | Movimiento del catálogo (por ejemplo, press de banca plano), con su grupo muscular. | Serie, Dosificación |
+| Ejercicio | Movimiento del catálogo (por ejemplo, press de banca plano), con su grupo muscular y, si el grupo se subdivide, su subgrupo. | Serie, Dosificación |
+| Grupo muscular | Primer nivel de clasificación de un ejercicio: Pierna, Pecho, Espalda, Hombro, Brazo o Core. | Subgrupo |
+| Subgrupo | Segundo nivel de clasificación, opcional: Pierna (Cuádriceps, Femoral, Glúteo, Gemelos), Espalda (Dorsales, Trapecio) y Brazo (Bíceps, Tríceps). Pecho, Hombro y Core no tienen subgrupos. | Grupo muscular |
 | Catálogo de ejercicios | Lista de ejercicios disponibles para armar rutinas. Permite reconocer el mismo ejercicio en planes distintos y seguir su progreso. | Rutina |
 | Dosificación | Lo prescripto para un ejercicio dentro de una rutina: orden, series objetivo, rango de repeticiones y RIR objetivo.  | Serie |
 | Asignar Plan | Dar un plan a un deportista con su vigencia. Un plan puede asignarse a varios deportistas, cada uno con sus fechas.  | Compartir, Copiar |
@@ -185,7 +187,7 @@ El dominio se divide en cuatro contextos. El core domain es **Registro de entren
 | :---: | :---: | :---: | :---: |
 | Registro de entrenamiento | Core | Sesión de entrenamiento, serie y el cálculo del progreso (1RM estimado, récord personal, cumplimiento) | Deportista (registra); deportista y entrenador (consultan) |
 | Planificación | Soporte | Plan de entrenamiento, rutina, dosificación de cada ejercicio ,  vigencia y asignación | Entrenador (arma y asigna); deportista (consulta) |
-| Catálogo de ejercicios | Soporte | Ejercicios con su nombre y grupo muscular | Entrenador (elige ejercicios) |
+| Catálogo de ejercicios | Soporte | Ejercicios con su nombre, grupo muscular y subgrupo | Entrenador (elige ejercicios) |
 | Identidad y acceso | Genérico | Cuentas, rol (deportista o entrenador) y vínculo entre entrenador y deportista | Todos, para ingresar a la aplicación |
 
 El progreso no es un contexto aparte: es un **modelo de lectura** dentro de Registro de entrenamiento, igual que la lista de precios en el análisis de Inventario. Se calcula a partir de las series registradas y no tiene datos propios. Esos cálculos los hace un servicio de dominio de este contexto (ver paso 7).
@@ -239,7 +241,7 @@ Nota: armar y asignar un plan producen los eventos de Planificación; registrar 
 | Asignación | Entidad (dentro de Plan) | deportistaId, vigencia | No se superpone con otra asignación del deportista (RN11); vigencia válida (RN10). |
 | Rutina | Entidad (dentro de Plan) | nombre, dosificaciones | Al menos una dosificación (RN10). |
 | Dosificación | Value Object | ejercicioId, orden, series objetivo, rango de repeticiones, RIR objetivo  | Un ejercicio no se repite en la rutina (RN15). |
-| Ejercicio | Agregado raíz | nombre, grupo muscular | Base precargada |
+| Ejercicio | Agregado raíz | nombre, grupo muscular, subgrupo (opcional) | Base precargada. Clasificación en dos niveles: grupo muscular (PIERNA, PECHO, ESPALDA, HOMBRO, BRAZO, CORE) y subgrupo (CUADRICEPS, FEMORAL, GLUTEO, GEMELOS, DORSALES, TRAPECIO, BICEPS, TRICEPS). |
 | Peso | Value object | kg, hasta 2 decimales | ≥ 0; 0 \= peso corporal (RN5). |
 | Repeticiones | Value object | entero | \> 0 (RN4). |
 | RIR | Value object | entero | ≥ 0 (RN6). |
@@ -288,7 +290,7 @@ Nota: armar y asignar un plan producen los eventos de Planificación; registrar 
 | Caso | Tipo | Contexto | Entrada | Salida | Reglas |
 | :---: | ----- | :---: | :---: | :---: | :---: |
 | CU1 Listar mis deportistas | Consulta | Identidad y acceso | — | id, nombre, email, plan vigente y vigencia  | — |
-| CU2 Listar catálogo | Consulta | Catálogo | filtro por grupo muscular (opcional) | id, nombre, grupo muscular | — |
+| CU2 Listar catálogo | Consulta | Catálogo | filtros por grupo muscular y por subgrupo (opcionales) | id, nombre, grupo muscular, subgrupo | — |
 | CU3 Armar plan | Mantenimiento | Planificación | nombre, indicaciones, rutinas con dosificaciones | Plan creado (evento) | RN10, RN15 |
 | CU4 Asignar plan | Mantenimiento | Planificación → Identidad | planId, deportistaId, vigencia | Plan asignado (evento) | RN10, RN11, RN14 |
 | CU5 Modificar plan | Mantenimiento | Planificación | planId, cambios | plan corregido | RN10, RN13, RN15 |
@@ -356,7 +358,7 @@ Nota: armar y asignar un plan producen los eventos de Planificación; registrar 
 | POST /api/mediciones | { peso\_corporal, altura } | 201 { id, fecha } | 401, 422 |
 | GET /api/mediciones | ?deportista\_id, ?desde, ?hasta | 200 \[{ fecha, peso\_corporal, altura }\] | 401, 403 |
 | GET /api/deportistas/{id}/progreso/{ejercicio\_id} | — | 200 \[{ fecha, peso\_maximo, repeticiones }\] | 401, 403 |
-| GET /api/ejercicios  | ?grupo\_muscular (opcional)  | 200 \[{ id, nombre, grupo\_muscular }\]  | 401, 403, 422 |
+| GET /api/ejercicios  | ?grupo\_muscular (opcional), ?subgrupo (opcional)  | 200 \[{ id, nombre, grupo\_muscular, subgrupo }\] (subgrupo es null si el grupo no se subdivide)  | 401, 403, 422 |
 | POST /api/auth/register | { nombre, email, contrasena, rol } | 201 { id, nombre, email, rol } | 422 |
 | POST /api/auth/login | { email, contrasena } | 200 { access\_token, refresh\_token, usuario: { id, nombre, email, rol } } | 401, 422 |
 | POST /api/auth/refresh | { refresh\_token } | 200 { access\_token, refresh\_token } | 401, 422 |
@@ -434,8 +436,8 @@ Como entrenador quiero consultar el catálogo de ejercicios para elegir los ejer
 
 Criterios de Aceptación:
 
-* De cada ejercicio se muestran su nombre y su grupo muscular.  
-* Se puede filtrar por grupo muscular  
+* De cada ejercicio se muestran su nombre, su grupo muscular y, si lo tiene, su subgrupo.  
+* Se puede filtrar por grupo muscular (Pierna, Pecho, Espalda, Hombro, Brazo, Core) y, dentro de un grupo que se subdivide, por subgrupo (por ejemplo, Pierna → Glúteo).  
 * El catálogo incluye los ejercicios precargados.
 
 **US-06**  

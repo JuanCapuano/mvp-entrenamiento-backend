@@ -175,7 +175,7 @@ catalogo/
 │   ├── controllers/      ejercicios.controller.ts
 │   └── queries/          ejercicios.query.ts, ejercicios.query-service.ts
 ├── domain/
-│   ├── entities/         ejercicio.entity.ts (incluye el enum GrupoMuscular)
+│   ├── entities/         ejercicio.entity.ts (incluye los enums GrupoMuscular y Subgrupo)
 │   └── interfaces/       ejercicio.repository-interface.ts
 ├── infraestructure/
 │   ├── repositories/     ejercicio.repository.ts
@@ -187,13 +187,13 @@ catalogo/
 
 | Pieza | Tipo | Responsabilidad |
 |---|---|---|
-| `Ejercicio` | Raíz de agregado | Nombre y grupo muscular (MMII, MMSS, CORE) |
+| `Ejercicio` | Raíz de agregado | Nombre, grupo muscular (PIERNA, PECHO, ESPALDA, HOMBRO, BRAZO, CORE) y subgrupo opcional (CUADRICEPS, FEMORAL, GLUTEO, GEMELOS, DORSALES, TRAPECIO, BICEPS, TRICEPS) |
 | `IEjercicioRepository` | Interfaz | `buscarPorId`, `existe` (los usan Planificación y Registro) |
 | `EjercicioRepository` | Repositorio | Implementa la interfaz con TypeORM |
 | `ejercicios.seed.ts` | Seed | Carga los ejercicios precargados |
-| `EjerciciosQuery` | QueryObject | Filtro opcional `grupo_muscular`; lo valida el `ValidationPipe` (422 si no es un grupo válido) |
-| `EjerciciosQueryService` | QueryService | Arma la consulta con QueryBuilder, ordena por grupo muscular y nombre, devuelve DTOs con el mapper |
-| `EjerciciosController` | Controlador | `GET /api/ejercicios?grupo_muscular`, con `@Roles(RolNombre.ENTRENADOR)` |
+| `EjerciciosQuery` | QueryObject | Filtros opcionales `grupo_muscular` y `subgrupo`; los valida el `ValidationPipe` (422 si no son valores válidos) |
+| `EjerciciosQueryService` | QueryService | Arma la consulta con QueryBuilder, ordena por grupo muscular, subgrupo y nombre, devuelve DTOs con el mapper |
+| `EjerciciosController` | Controlador | `GET /api/ejercicios?grupo_muscular&subgrupo`, con `@Roles(RolNombre.ENTRENADOR)` |
 
 ## Módulo `gestion-usuario`
 
