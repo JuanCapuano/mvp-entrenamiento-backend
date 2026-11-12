@@ -4,7 +4,8 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { In, Repository } from 'typeorm';
+import { Ejercicio } from '../../../catalogo/domain/entities/ejercicio.entity';
 import { PlanEntrenamiento } from '../../domain/entities/plan-entrenamiento.entity';
 import {
   PlanDetalleResponseDto,
@@ -18,6 +19,11 @@ export class PlanesQueryService {
   constructor(
     @InjectRepository(PlanEntrenamiento)
     private readonly repository: Repository<PlanEntrenamiento>,
+
+    // Solo lectura de una tabla de otro módulo (catálogo): permitido en un QueryService.
+    // Nunca se escribe en ella.
+    @InjectRepository(Ejercicio)
+    private readonly ejercicios: Repository<Ejercicio>,
   ) {}
 
   // CU16: solo los planes del entrenador del token
@@ -51,6 +57,27 @@ export class PlanesQueryService {
       throw new ForbiddenException('No tenés permisos para ver este plan.');
     }
 
-    return PlanMapper.aDetalleDto(plan);
+    const nombresEjercicios = await this.buscarNombresEjercicios(plan);
+
+    return PlanMapper.aDetalleDto(plan, nombresEjercicios);
+  }
+
+  // Nombre de cada ejercicio de las dosificaciones, en una sola consulta (ejercicioId → nombre)
+  private async buscarNombresEjercicios(
+    plan: PlanEntrenamiento,
+  ): Promise<Map<number, string>> {
+    const ids = [
+      ...new Set(
+        plan.rutinas.flatMap((r) => r.dosificaciones.map((d) => d.ejercicioId)),
+      ),
+    ];
+    if (ids.length === 0) return new Map();
+
+    const ejercicios = await this.ejercicios.find({
+      select: { id: true, nombre: true },
+      where: { id: In(ids) },
+    });
+
+    return new Map(ejercicios.map((e) => [e.id, e.nombre]));
   }
 }

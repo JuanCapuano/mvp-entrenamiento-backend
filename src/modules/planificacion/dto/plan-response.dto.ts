@@ -14,6 +14,7 @@ export class PlanResumenResponseDto {
 
 export class DosificacionResponseDto {
   ejercicio_id: number;
+  ejercicio_nombre: string | null; // del catálogo, solo para mostrar
   orden: number;
   series_objetivo: number;
   reps_min: number;

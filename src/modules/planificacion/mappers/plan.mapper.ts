@@ -18,7 +18,10 @@ export class PlanMapper {
     };
   }
 
-  static aDetalleDto(plan: PlanEntrenamiento): PlanDetalleResponseDto {
+  static aDetalleDto(
+    plan: PlanEntrenamiento,
+    nombresEjercicios: Map<number, string> = new Map(),
+  ): PlanDetalleResponseDto {
     return {
       id: plan.id,
       nombre: plan.nombre,
@@ -27,6 +30,7 @@ export class PlanMapper {
         nombre: rutina.nombre,
         dosificaciones: rutina.dosificaciones.map((d) => ({
           ejercicio_id: d.ejercicioId,
+          ejercicio_nombre: nombresEjercicios.get(d.ejercicioId) ?? null,
           orden: d.orden,
           series_objetivo: d.seriesObjetivo,
           reps_min: d.rangoRepeticiones.minimo,
