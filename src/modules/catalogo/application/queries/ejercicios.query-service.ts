@@ -25,7 +25,7 @@ export class EjerciciosQueryService {
         grupoMuscular: query.grupo_muscular,
       });
     }
-    if (query.subgrupo) { 
+    if (query.subgrupo) {
       qb.andWhere('ejercicio.subgrupo = :subgrupo', {
         subgrupo: query.subgrupo,
       });
