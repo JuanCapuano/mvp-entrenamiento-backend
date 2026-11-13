@@ -5,6 +5,8 @@ import { AuthModule } from './modules/gestion-usuario/auth/auth.module';
 import { UsuarioModule } from './modules/gestion-usuario/usuario/usuario.module';
 import { RolModule } from './modules/gestion-usuario/rol/rol.module';
 import { CatalogoModule } from './modules/catalogo/catalogo.module';
+import { EventEmitterModule } from '@nestjs/event-emitter';
+import { PlanificacionModule } from './modules/planificacion/planificacion.module';
 
 @Module({
   imports: [
@@ -23,6 +25,8 @@ import { CatalogoModule } from './modules/catalogo/catalogo.module';
       // Las entidades se registran automáticamente cuando usás
       // TypeOrmModule.forFeature([Entidad]) en tus módulos
       entities: [__dirname + '/**/*.entity{.ts,.js}'],
+      // Dosificacion es un VO (dosificacion.vo.ts) guardado en su tabla: no lo encuentra el glob de arriba
+      autoLoadEntities: true,
       synchronize: true, // Nunca usar en producción, solo para desarrollo
       ssl: process.env.DB_SSL === 'true',
     }),
@@ -30,6 +34,8 @@ import { CatalogoModule } from './modules/catalogo/catalogo.module';
     UsuarioModule,
     RolModule,
     CatalogoModule,
+    EventEmitterModule.forRoot(),
+    PlanificacionModule,
   ],
 })
 export class AppModule {}
