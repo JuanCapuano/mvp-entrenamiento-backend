@@ -4,6 +4,7 @@ import { Repository } from 'typeorm';
 import { Usuario } from '../../domain/entities/usuario.entity';
 import { UsuarioResponseDto } from '../../dto/usuario-response.dto';
 import { UsuarioMapper } from '../../mappers/usuario.mapper';
+import { DeportistaResponseDto } from '../../dto/deportista-response.dto';
 
 // QueryService: consultas de solo lectura, no pasan por el dominio y devuelven DTOs
 @Injectable()
@@ -24,5 +25,15 @@ export class UsuarioQueryService {
     }
 
     return UsuarioMapper.aDto(usuario);
+  }
+
+  // US-04: deportistas vinculados al entrenador del token
+  async listarDeportistas(entrenadorId: number): Promise<DeportistaResponseDto[]> {
+    const deportistas = await this.repository.find({
+      where: { entrenadorId },
+      order: { nombre: 'ASC' },
+    });
+
+    return deportistas.map((deportista) => UsuarioMapper.aDeportistaDto(deportista));
   }
 }
