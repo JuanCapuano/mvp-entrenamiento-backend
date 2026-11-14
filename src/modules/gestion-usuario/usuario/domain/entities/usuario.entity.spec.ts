@@ -56,3 +56,17 @@ describe('Usuario.vincularA (US-03, RN18)', () => {
     expect(juan.entrenadorId).toBe(LAURA_ID);
   });
 });
+
+describe('Usuario.estaVinculadoCon (RN14)', () => {
+  it('es true para el entrenador con el que está vinculado', () => {
+    const juan = crearUsuario('Juan Pérez', RolNombre.DEPORTISTA, LAURA_ID);
+    expect(juan.estaVinculadoCon(LAURA_ID)).toBe(true);
+  });
+
+  it('es false para otro entrenador o sin entrenador', () => {
+    const juan = crearUsuario('Juan Pérez', RolNombre.DEPORTISTA, LAURA_ID);
+    const sofia = crearUsuario('Sofía Ruiz', RolNombre.DEPORTISTA);
+    expect(juan.estaVinculadoCon(MARTIN_ID)).toBe(false);
+    expect(sofia.estaVinculadoCon(LAURA_ID)).toBe(false);
+  });
+});

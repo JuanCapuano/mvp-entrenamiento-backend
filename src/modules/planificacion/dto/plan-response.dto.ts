@@ -5,6 +5,14 @@ export class PlanCreadoResponseDto {
   id: number;
 }
 
+// POST /api/planes/{id}/asignaciones
+export class AsignacionResponseDto {
+  plan_id: number;
+  deportista_id: number;
+  vigencia_desde: string;
+  vigencia_hasta: string;
+}
+
 // GET /api/planes
 export class PlanResumenResponseDto {
   id: number;
