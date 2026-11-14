@@ -7,6 +7,7 @@ import { RolModule } from './modules/gestion-usuario/rol/rol.module';
 import { CatalogoModule } from './modules/catalogo/catalogo.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PlanificacionModule } from './modules/planificacion/planificacion.module';
+import { MedicionesModule } from './modules/mediciones/mediciones.module';
 
 @Module({
   imports: [
@@ -36,6 +37,7 @@ import { PlanificacionModule } from './modules/planificacion/planificacion.modul
     CatalogoModule,
     EventEmitterModule.forRoot(),
     PlanificacionModule,
+    MedicionesModule,
   ],
 })
 export class AppModule {}
