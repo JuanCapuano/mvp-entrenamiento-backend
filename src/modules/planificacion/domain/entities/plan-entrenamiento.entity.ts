@@ -41,7 +41,15 @@ export class PlanEntrenamiento {
     plan.entrenadorId = entrenadorId;
     plan.nombre = nombre.trim();
     plan.indicaciones = indicaciones?.trim() ? indicaciones.trim() : null;
+    // El orden de las rutinas es el orden en que llegan (1..n); lo decide la raíz
+    rutinas.forEach((rutina, indice) => {
+      rutina.orden = indice + 1;
+    });
     plan.rutinas = rutinas;
     return plan;
+  }
+    // Siempre en el orden definido, sin depender de cómo las cargue la base
+    rutinasOrdenadas(): Rutina[] {
+      return [...this.rutinas].sort((a, b) => a.orden - b.orden);
   }
 }

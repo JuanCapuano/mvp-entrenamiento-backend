@@ -19,6 +19,9 @@ export class Rutina {
   @Column()
   nombre: string;
 
+  @Column({ type: 'int', default: 0 })
+  orden: number;
+
   @ManyToOne(() => PlanEntrenamiento, (plan) => plan.rutinas, {
     nullable: false,
     onDelete: 'CASCADE',
@@ -33,6 +36,7 @@ export class Rutina {
 
   // RN10: al menos una dosificación. RN15: un ejercicio no se repite dentro de la rutina.
   static crear(nombre: string, dosificaciones: Dosificacion[]): Rutina {
+    
     if (!nombre || nombre.trim() === '') {
       throw new DomainException('La rutina tiene que tener un nombre.');
     }
@@ -61,5 +65,10 @@ export class Rutina {
     rutina.nombre = nombre.trim();
     rutina.dosificaciones = ordenadas;
     return rutina;
+  }
+
+  //siempre en el orden definido, sin depender de cómo las cargue la base
+  dosificacionesOrdenadas(): Dosificacion[] {
+    return [...this.dosificaciones].sort((a, b) => a.orden - b.orden);
   }
 }
