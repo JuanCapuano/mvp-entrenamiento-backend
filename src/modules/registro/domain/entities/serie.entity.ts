@@ -84,4 +84,10 @@ export class Serie {
     this.repeticiones = repeticiones!;
     this.rir = rir!;
   }
+
+  // US-17: solo la llama su raíz (SesionEntrenamiento.corregirSerie).
+  // Los value objects se reemplazan enteros; el número y el ejercicio no cambian.
+  corregir(peso: Peso, repeticiones: Repeticiones, rir: RIR): void {
+    Object.assign(this, { peso, repeticiones, rir });
+  }
 }

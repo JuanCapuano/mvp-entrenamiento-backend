@@ -10,6 +10,8 @@ export interface ISesionEntrenamientoRepository {
     rutinaId: number,
     fecha: string,
   ): Promise<SesionEntrenamiento | null>;
+  // US-17: la sesión (con todas sus series) que contiene esa serie
+  buscarPorSerie(serieId: number): Promise<SesionEntrenamiento | null>;
   buscarSeriesDelEjercicio(
     deportistaId: number,
     ejercicioId: number,

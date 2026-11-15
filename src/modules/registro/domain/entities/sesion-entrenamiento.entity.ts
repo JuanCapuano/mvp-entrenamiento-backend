@@ -101,4 +101,32 @@ export class SesionEntrenamiento {
     this.seriesRegistradas.push(serie);
     return serie;
   }
+
+  // US-17: cambia los valores de una serie de esta sesión. La serie conserva su número.
+  // RN1: solo el dueño. RN8: solo el mismo día de la sesión; después es inmutable.
+  corregirSerie(
+    deportistaId: number,
+    hoy: string,
+    serieId: number,
+    peso: Peso,
+    repeticiones: Repeticiones,
+    rir: RIR,
+  ): Serie {
+    if (this.deportistaId !== deportistaId) {
+      throw new DomainException(
+        'Solo el dueño de la sesión puede corregir sus series.',
+      );
+    }
+    if (this.fecha !== hoy) {
+      throw new DomainException('Solo se puede corregir el mismo día.');
+    }
+    const serie = this.seriesRegistradas.find(
+      (registrada) => registrada.id === serieId,
+    );
+    if (!serie) {
+      throw new DomainException('La serie no pertenece a esta sesión.');
+    }
+    serie.corregir(peso, repeticiones, rir);
+    return serie;
+  }
 }

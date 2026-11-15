@@ -26,6 +26,13 @@ export class SesionEntrenamientoRepositoryEnMemoria implements ISesionEntrenamie
     return sesion ? copiar(sesion) : null;
   }
 
+  async buscarPorSerie(serieId: number) {
+    const sesion = [...this.sesiones.values()].find((sesion) =>
+      sesion.series.some((serie) => serie.id === serieId),
+    );
+    return sesion ? copiar(sesion) : null;
+  }
+
   async buscarSeriesDelEjercicio(deportistaId: number, ejercicioId: number) {
     return [...this.sesiones.values()]
       .filter((sesion) => sesion.deportistaId === deportistaId)

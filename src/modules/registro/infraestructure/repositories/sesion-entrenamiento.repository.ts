@@ -28,6 +28,17 @@ export class SesionEntrenamientoRepository implements ISesionEntrenamientoReposi
       .getOne();
   }
 
+  // Primero ubica la sesión por la serie y después la carga entera, con todas sus series
+  async buscarPorSerie(serieId: number): Promise<SesionEntrenamiento | null> {
+    const serie = await this.series.findOne({ where: { id: serieId } });
+    if (!serie) return null;
+    return this.sesiones
+      .createQueryBuilder('sesion')
+      .leftJoinAndSelect('sesion.seriesRegistradas', 'serie')
+      .where('sesion.id = :sesionId', { sesionId: serie.sesionId })
+      .getOne();
+  }
+
   buscarSeriesDelEjercicio(
     deportistaId: number,
     ejercicioId: number,

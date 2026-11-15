@@ -14,6 +14,7 @@ import {
   RegistrarSerieUseCase,
   FECHA_ACTUAL_REGISTRO,
 } from './application/use-cases/registrar-serie.use-case';
+import { CorregirSerieUseCase } from './application/use-cases/corregir-serie.use-case';
 import { SeriesController } from './application/controllers/series.controller';
 import { SesionesController } from './application/controllers/sesiones.controller';
 import { SesionesQueryService } from './application/queries/sesiones.query-service';
@@ -43,6 +44,7 @@ export class RegistroModule {
         CalculadoraCumplimiento,
         VerificadorEjercicioPlanVigente,
         RegistrarSerieUseCase,
+        CorregirSerieUseCase,
         SesionesQueryService,
       ],
       exports: [ISesionEntrenamientoRepositoryToken],
