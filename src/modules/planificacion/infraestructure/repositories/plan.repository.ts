@@ -15,4 +15,11 @@ export class PlanRepository implements IPlanRepository {
   guardar(plan: PlanEntrenamiento): Promise<PlanEntrenamiento> {
     return this.repository.save(plan);
   }
+  async buscarPorId(id: number): Promise<PlanEntrenamiento | null> {
+    return this.repository.findOne({
+      where: { id },
+      relations: { rutinas: { dosificaciones: true } },
+      order: { rutinas: { orden: 'ASC', dosificaciones: { orden: 'ASC' } } },
+    });
+  }
 }
