@@ -48,8 +48,8 @@ export class PlanEntrenamiento {
     plan.rutinas = rutinas;
     return plan;
   }
-    // Siempre en el orden definido, sin depender de cómo las cargue la base
-    rutinasOrdenadas(): Rutina[] {
-      return [...this.rutinas].sort((a, b) => a.orden - b.orden);
+  // Siempre en el orden definido, sin depender de cómo las cargue la base
+  rutinasOrdenadas(): Rutina[] {
+    return [...this.rutinas].sort((a, b) => a.orden - b.orden);
   }
 }

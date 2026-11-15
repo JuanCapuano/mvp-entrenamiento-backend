@@ -36,7 +36,6 @@ export class Rutina {
 
   // RN10: al menos una dosificación. RN15: un ejercicio no se repite dentro de la rutina.
   static crear(nombre: string, dosificaciones: Dosificacion[]): Rutina {
-    
     if (!nombre || nombre.trim() === '') {
       throw new DomainException('La rutina tiene que tener un nombre.');
     }
