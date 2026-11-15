@@ -8,6 +8,7 @@ import { ISesionEntrenamientoRepositoryToken } from './domain/interfaces/sesion-
 import { SesionEntrenamientoRepository } from './infraestructure/repositories/sesion-entrenamiento.repository';
 import { SesionEntrenamientoFactory } from './domain/factories/sesion-entrenamiento.factory';
 import { DetectorRecordPersonal } from './domain/services/detector-record-personal.service';
+import { CalculadoraCumplimiento } from './domain/services/calculadora-cumplimiento.service';
 import { VerificadorEjercicioPlanVigente } from './domain/services/verificador-ejercicio-plan-vigente.service';
 import {
   RegistrarSerieUseCase,
@@ -39,6 +40,7 @@ export class RegistroModule {
         { provide: FECHA_ACTUAL_REGISTRO, useValue: fechaActual },
         SesionEntrenamientoFactory,
         DetectorRecordPersonal,
+        CalculadoraCumplimiento,
         VerificadorEjercicioPlanVigente,
         RegistrarSerieUseCase,
         SesionesQueryService,

@@ -1,4 +1,5 @@
 import type {
+  DosificacionParaRegistro,
   IPlanRepository,
   PlanVigenteParaRegistro,
 } from '../../src/modules/planificacion/domain/interfaces/plan.repository-interface';
@@ -10,6 +11,8 @@ export class PlanRepositoryEnMemoria implements IPlanRepository {
     desde: string;
     hasta: string;
     plan: PlanVigenteParaRegistro;
+    // US-16: dosificaciones de cada rutina del plan, por id de rutina
+    rutinas?: Record<number, DosificacionParaRegistro[]>;
   }[] = [];
 
   async buscarPlanVigenteDelDeportista(deportistaId: number, fecha: string) {
@@ -21,5 +24,19 @@ export class PlanRepositoryEnMemoria implements IPlanRepository {
           fecha <= asignacion.hasta,
       )?.plan ?? null
     );
+  }
+
+  async buscarDosificacionesDeRutinaVigente(
+    deportistaId: number,
+    rutinaId: number,
+    fecha: string,
+  ) {
+    const vigente = this.asignaciones.find(
+      (asignacion) =>
+        asignacion.deportistaId === deportistaId &&
+        asignacion.desde <= fecha &&
+        fecha <= asignacion.hasta,
+    );
+    return vigente?.rutinas?.[rutinaId] ?? null;
   }
 }

@@ -3,12 +3,14 @@ import {
   Get,
   Param,
   ParseIntPipe,
+  Query,
   UnprocessableEntityException,
 } from '@nestjs/common';
 import { Roles } from '../../../gestion-usuario/auth/roles.decorator';
 import { UsuarioActual } from '../../../gestion-usuario/auth/usuario-actual.decorator';
 import type { UsuarioToken } from '../../../gestion-usuario/auth/usuario-actual.decorator';
 import { RolNombre } from '../../../gestion-usuario/rol/domain/enums/rol-nombre.enum';
+import { SesionDeHoyQuery } from '../queries/sesion-de-hoy.query';
 import { SesionesQueryService } from '../queries/sesiones.query-service';
 
 // Consultas del registro de entrenamiento (Paso 11). Sin lógica: el controlador solo delega.
@@ -16,6 +18,16 @@ import { SesionesQueryService } from '../queries/sesiones.query-service';
 @Controller()
 export class SesionesController {
   constructor(private readonly queryService: SesionesQueryService) {}
+
+  // GET /api/sesiones/hoy?rutina_id → 200 { cumplimiento, ejercicios: [{ ejercicio_id, series_objetivo, series[] }] }
+  @Get('sesiones/hoy')
+  @Roles(RolNombre.DEPORTISTA)
+  buscarSesionDeHoy(
+    @UsuarioActual() usuario: UsuarioToken,
+    @Query() query: SesionDeHoyQuery,
+  ) {
+    return this.queryService.buscarSesionDeHoy(usuario.id, query.rutina_id);
+  }
 
   // GET /api/ejercicios/{id}/ultimas-series → 200 { fecha, series: [{ numero, peso, repeticiones, rir }] }
   @Get('ejercicios/:id/ultimas-series')
