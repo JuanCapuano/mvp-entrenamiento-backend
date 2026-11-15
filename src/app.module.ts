@@ -8,6 +8,8 @@ import { CatalogoModule } from './modules/catalogo/catalogo.module';
 import { EventEmitterModule } from '@nestjs/event-emitter';
 import { PlanificacionModule } from './modules/planificacion/planificacion.module';
 import { MedicionesModule } from './modules/mediciones/mediciones.module';
+import { RegistroModule } from './modules/registro/registro.module';
+import { EventosModule } from './modules/common/eventos/eventos.module';
 
 @Module({
   imports: [
@@ -38,6 +40,8 @@ import { MedicionesModule } from './modules/mediciones/mediciones.module';
     EventEmitterModule.forRoot(),
     PlanificacionModule,
     MedicionesModule,
+    // Registro necesita el plan vigente (planificación) y el publicador de eventos
+    RegistroModule.conDependencias([PlanificacionModule, EventosModule]),
   ],
 })
 export class AppModule {}

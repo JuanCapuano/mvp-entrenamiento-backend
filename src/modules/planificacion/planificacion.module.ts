@@ -25,5 +25,7 @@ import { PlanRepository } from './infraestructure/repositories/plan.repository';
     CrearPlanUseCase,
     PlanesQueryService,
   ],
+  // Registro usa buscarPlanVigenteDelDeportista y buscarDosificacionesDeRutinaVigente
+  exports: [IPlanRepositoryToken],
 })
 export class PlanificacionModule {}
