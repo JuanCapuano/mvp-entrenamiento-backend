@@ -14,6 +14,8 @@ import {
   FECHA_ACTUAL_REGISTRO,
 } from './application/use-cases/registrar-serie.use-case';
 import { SeriesController } from './application/controllers/series.controller';
+import { SesionesController } from './application/controllers/sesiones.controller';
+import { SesionesQueryService } from './application/queries/sesiones.query-service';
 
 @Module({})
 export class RegistroModule {
@@ -28,7 +30,7 @@ export class RegistroModule {
         TypeOrmModule.forFeature([SesionEntrenamiento, Serie]),
         ...imports,
       ],
-      controllers: [SeriesController],
+      controllers: [SeriesController, SesionesController],
       providers: [
         {
           provide: ISesionEntrenamientoRepositoryToken,
@@ -39,6 +41,7 @@ export class RegistroModule {
         DetectorRecordPersonal,
         VerificadorEjercicioPlanVigente,
         RegistrarSerieUseCase,
+        SesionesQueryService,
       ],
       exports: [ISesionEntrenamientoRepositoryToken],
     };
