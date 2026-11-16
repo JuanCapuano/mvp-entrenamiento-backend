@@ -12,6 +12,7 @@ import type { UsuarioToken } from '../../../gestion-usuario/auth/usuario-actual.
 import { RolNombre } from '../../../gestion-usuario/rol/domain/enums/rol-nombre.enum';
 import { SesionDeHoyQuery } from '../queries/sesion-de-hoy.query';
 import { SesionesQueryService } from '../queries/sesiones.query-service';
+import { Rol } from '../../../gestion-usuario/rol/domain/entities/rol.entity';
 
 // Consultas del registro de entrenamiento (Paso 11). Sin lógica: el controlador solo delega.
 // Las rutas no comparten prefijo, así que cada una declara la suya completa.

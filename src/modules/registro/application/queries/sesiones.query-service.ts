@@ -96,4 +96,5 @@ export class SesionesQueryService {
 
     return UltimasSeriesMapper.aDto(ultima.fecha, series);
   }
+
 }
