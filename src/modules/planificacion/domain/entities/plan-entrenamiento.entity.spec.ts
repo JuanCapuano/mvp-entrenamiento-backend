@@ -1,6 +1,7 @@
 import { DomainException } from '../../../common/exceptions/domain-exceptions';
 import { Dosificacion } from '../value-objects/dosificacion.vo';
 import { RangoRepeticiones } from '../value-objects/rango-repeticiones.vo';
+import { Vigencia } from '../value-objects/vigencia.vo';
 import { PlanEntrenamiento } from './plan-entrenamiento.entity';
 import { Rutina } from './rutina.entity';
 
@@ -57,6 +58,30 @@ describe('PlanEntrenamiento', () => {
   it('se crea sin asignarlo a ningún deportista', () => {
     const plan = PlanEntrenamiento.crear(5, 'Fuerza', null, [rutina()]);
     expect(plan.id).toBeUndefined();
+    expect(plan.asignaciones).toEqual([]);
+  });
+
+  describe('agregarAsignacion (US-08)', () => {
+    it('asigna el plan a un deportista con su vigencia', () => {
+      const plan = PlanEntrenamiento.crear(5, 'Fuerza', null, [rutina()]);
+      const vigencia = Vigencia.crear('2026-10-01', '2026-11-30');
+
+      const asignacion = plan.agregarAsignacion(10, vigencia);
+
+      expect(asignacion.deportistaId).toBe(10);
+      expect(asignacion.vigencia).toBe(vigencia);
+      expect(plan.asignaciones).toEqual([asignacion]);
+    });
+
+    it('un mismo plan se asigna a varios deportistas, cada uno con sus fechas', () => {
+      const plan = PlanEntrenamiento.crear(5, 'Fuerza', null, [rutina()]);
+
+      plan.agregarAsignacion(10, Vigencia.crear('2026-10-01', '2026-11-30'));
+      plan.agregarAsignacion(11, Vigencia.crear('2026-10-15', '2026-12-15'));
+
+      expect(plan.asignaciones.map((a) => a.deportistaId)).toEqual([10, 11]);
+      expect(plan.asignaciones[1].vigencia.desde).toBe('2026-10-15');
+    });
   });
   describe('PlanEntrenamiento - varias rutinas (US-07)', () => {
     it('un plan puede tener varias rutinas, cada una con su nombre', () => {

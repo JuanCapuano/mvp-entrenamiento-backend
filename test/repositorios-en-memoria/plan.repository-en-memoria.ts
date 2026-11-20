@@ -1,3 +1,4 @@
+import { Asignacion } from '../../src/modules/planificacion/domain/entities/asignacion.entity';
 import { PlanEntrenamiento } from '../../src/modules/planificacion/domain/entities/plan-entrenamiento.entity';
 import type {
   DosificacionParaRegistro,
@@ -54,5 +55,13 @@ export class PlanRepositoryEnMemoria implements IPlanRepository {
         asignacion.desde <= fecha &&
         fecha <= asignacion.hasta,
     );
+  }
+
+  async buscarAsignacionesDelDeportista(
+    deportistaId: number,
+  ): Promise<Asignacion[]> {
+    return this.planes
+      .flatMap((plan) => plan.asignaciones ?? [])
+      .filter((asignacion) => asignacion.deportistaId === deportistaId);
   }
 }

@@ -57,4 +57,8 @@ vincularA(entrenadorId: number): void {
   this.entrenadorId = entrenadorId;
 }
 
+  // RN14: un plan solo se asigna a un deportista vinculado con el entrenador
+  estaVinculadoCon(entrenadorId: number): boolean {
+    return this.entrenadorId === entrenadorId;
+  }
 }

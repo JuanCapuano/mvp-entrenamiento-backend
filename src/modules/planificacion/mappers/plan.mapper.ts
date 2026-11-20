@@ -1,5 +1,7 @@
+import { Asignacion } from '../domain/entities/asignacion.entity';
 import { PlanEntrenamiento } from '../domain/entities/plan-entrenamiento.entity';
 import {
+  AsignacionResponseDto,
   PlanCreadoResponseDto,
   PlanDetalleResponseDto,
   PlanResumenResponseDto,
@@ -8,6 +10,18 @@ import {
 export class PlanMapper {
   static aCreadoDto(plan: PlanEntrenamiento): PlanCreadoResponseDto {
     return { id: plan.id };
+  }
+
+  static aAsignacionDto(
+    planId: number,
+    asignacion: Asignacion,
+  ): AsignacionResponseDto {
+    return {
+      plan_id: planId,
+      deportista_id: asignacion.deportistaId,
+      vigencia_desde: asignacion.vigencia.desde,
+      vigencia_hasta: asignacion.vigencia.hasta,
+    };
   }
 
   static aResumenDto(plan: PlanEntrenamiento): PlanResumenResponseDto {
