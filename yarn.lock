@@ -885,10 +885,10 @@
     path-to-regexp "8.4.2"
     tslib "2.8.1"
 
-"@nestjs/event-emitter@^12.0.2":
-  version "12.0.2"
-  resolved "https://registry.yarnpkg.com/@nestjs/event-emitter/-/event-emitter-12.0.2.tgz#c1479a68e3b3574f95de15dbfb6fd7e6b633d032"
-  integrity sha512-Vbg+3sm7aVFxrmMA4tf78LWS/ooOC5qH6djhyJvqQjCkDb1NOHERNH7qsjiQ++u/XsUeVWXzL/F6A/hr9cbcrw==
+"@nestjs/event-emitter@^12.0.3":
+  version "12.0.3"
+  resolved "https://registry.yarnpkg.com/@nestjs/event-emitter/-/event-emitter-12.0.3.tgz#80102706c292b431cbd657fe87cb80ee6b73b005"
+  integrity sha512-HqooB51fhExAxGIHgncA0GyoNCXANmr+LEL/rsnQBL/9CxVDNmXGdoHpnrz8FnhMbq10TbgYfEBVANEPEFVb0A==
   dependencies:
     eventemitter2 "6.4.9"
 
