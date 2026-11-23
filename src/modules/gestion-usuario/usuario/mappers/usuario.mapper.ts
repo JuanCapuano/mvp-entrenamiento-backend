@@ -12,11 +12,12 @@ export class UsuarioMapper {
     };
   }
 
-  static aDeportistaDto(deportista: Usuario): DeportistaResponseDto {
+  static aDeportistaDto(deportista: Usuario, planVigente: DeportistaResponseDto['plan_vigente'] = null,): DeportistaResponseDto {
     return {
       id: deportista.id,
       nombre: deportista.nombre,
       email: deportista.email,
+      plan_vigente: planVigente,
     };
   }
 }

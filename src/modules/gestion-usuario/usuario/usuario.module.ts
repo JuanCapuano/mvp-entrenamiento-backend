@@ -7,10 +7,12 @@ import { UsuarioRepository } from './infraestructure/repositories/usuario.reposi
 import { IUsuarioRepositoryToken } from './domain/interfaces/usuario.repository-interface';
 import { DeportistasController } from './application/controllers/deportista.controller';
 import { DeportistaUseCase } from './application/uses-cases/deportista.use-case';
+import { Asignacion } from '../../planificacion/domain/entities/asignacion.entity';
+
 
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Usuario])],
+  imports: [TypeOrmModule.forFeature([Usuario, Asignacion])],
   controllers: [UsuarioController, DeportistasController],
   providers: [
     UsuarioQueryService,
