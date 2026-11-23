@@ -31,6 +31,7 @@ export class DosificacionResponseDto {
 }
 
 export class RutinaResponseDto {
+  id: number; // NUEVO: el front lo usa como rutina_id al registrar series
   nombre: string;
   dosificaciones: DosificacionResponseDto[];
 }
@@ -40,5 +41,15 @@ export class PlanDetalleResponseDto {
   id: number;
   nombre: string;
   indicaciones: string | null;
+  rutinas: RutinaResponseDto[];
+}
+
+// GET /api/plan-vigente
+export class PlanVigenteResponseDto {
+  id: number;
+  nombre: string;
+  indicaciones: string | null;
+  entrenador_nombre: string | null;
+  vigencia: { desde: string; hasta: string };
   rutinas: RutinaResponseDto[];
 }

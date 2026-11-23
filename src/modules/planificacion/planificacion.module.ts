@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { CatalogoModule } from '../catalogo/catalogo.module';
 import { Ejercicio } from '../catalogo/domain/entities/ejercicio.entity';
+import { Usuario } from '../gestion-usuario/usuario/domain/entities/usuario.entity';
 import { PlanesController } from './application/controllers/planes.controller';
 import { PlanesQueryService } from './application/queries/planes.query-service';
 import { AsignarPlanUseCase } from './application/use-cases/asignar-plan.use-case';
@@ -14,6 +15,7 @@ import { IPlanRepositoryToken } from './domain/interfaces/plan.repository-interf
 import { VerificadorSuperposicion } from './domain/services/verificador-superposicion.service';
 import { Dosificacion } from './domain/value-objects/dosificacion.vo';
 import { PlanRepository } from './infraestructure/repositories/plan.repository';
+import { PlanVigenteController } from './application/controllers/plan-vigente.controller';
 
 @Module({
   imports: [
@@ -25,11 +27,11 @@ import { PlanRepository } from './infraestructure/repositories/plan.repository';
       Asignacion,
     ]),
     // Ejercicio: solo lectura, para mostrar el nombre en el detalle del plan (PlanesQueryService)
-    TypeOrmModule.forFeature([Ejercicio]),
+    TypeOrmModule.forFeature([Ejercicio, Usuario]),
     CatalogoModule, // IEjercicioRepositoryToken: validar los ejercicios de las dosificaciones
     UsuarioModule, // IUsuarioRepositoryToken: verificar el vínculo al asignar (RN14)
   ],
-  controllers: [PlanesController],
+  controllers: [PlanesController, PlanVigenteController],
   providers: [
     { provide: IPlanRepositoryToken, useClass: PlanRepository },
     CrearPlanUseCase,

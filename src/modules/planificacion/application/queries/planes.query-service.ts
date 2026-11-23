@@ -4,7 +4,7 @@ import {
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { In, Repository } from 'typeorm';
+import { In, Repository, LessThanOrEqual, MoreThanOrEqual } from 'typeorm';
 import { Ejercicio } from '../../../catalogo/domain/entities/ejercicio.entity';
 import { PlanEntrenamiento } from '../../domain/entities/plan-entrenamiento.entity';
 import {
@@ -12,6 +12,9 @@ import {
   PlanResumenResponseDto,
 } from '../../dto/plan-response.dto';
 import { PlanMapper } from '../../mappers/plan.mapper';
+import { fechaActual } from '../../../common/helpers/fecha-actual.helper';
+import { Usuario } from '../../../gestion-usuario/usuario/domain/entities/usuario.entity';
+import { PlanVigenteResponseDto } from '../../dto/plan-response.dto';
 
 // QueryService: consultas de solo lectura, no pasan por el dominio y devuelven DTOs
 @Injectable()
@@ -24,6 +27,11 @@ export class PlanesQueryService {
     // Nunca se escribe en ella.
     @InjectRepository(Ejercicio)
     private readonly ejercicios: Repository<Ejercicio>,
+
+    // Solo lectura de una tabla de otro módulo (usuario): permitido en un QueryService
+    @InjectRepository(Usuario)
+    private readonly usuarios: Repository<Usuario>,
+
   ) {}
 
   // CU16: solo los planes del entrenador del token
@@ -60,6 +68,40 @@ export class PlanesQueryService {
     const nombresEjercicios = await this.buscarNombresEjercicios(plan);
 
     return PlanMapper.aDetalleDto(plan, nombresEjercicios);
+  }
+
+    // US13, plan vigente del deportista del token
+  async buscarPlanVigente(deportistaId: number): Promise<PlanVigenteResponseDto> {
+    const hoy = fechaActual();
+
+    const plan = await this.repository.findOne({
+      where: {
+        asignaciones: {
+          deportistaId,
+          vigencia: { desde: LessThanOrEqual(hoy), hasta: MoreThanOrEqual(hoy) },
+        },
+      },
+      relations: { asignaciones: true, rutinas: { dosificaciones: true } },
+      order: { rutinas: { orden: 'ASC', dosificaciones: { orden: 'ASC' } } },
+    });
+
+    if (!plan) {
+      // confirmar en el paso 11 si es 404 o 200 vacío, y el mensaje textual
+      throw new NotFoundException('No tenés un plan vigente.');
+    }
+
+    const nombres = await this.buscarNombresEjercicios(plan);
+    const entrenador = await this.usuarios.findOne({
+      select: { id: true, nombre: true },
+      where: { id: plan.entrenadorId },
+    });
+
+    return PlanMapper.aVigenteDto(
+      plan,
+      plan.asignaciones[0],
+      entrenador?.nombre ?? null,
+      nombres,
+    );
   }
 
   // Nombre de cada ejercicio de las dosificaciones, en una sola consulta (ejercicioId → nombre)

@@ -5,6 +5,7 @@ import {
   PlanCreadoResponseDto,
   PlanDetalleResponseDto,
   PlanResumenResponseDto,
+  PlanVigenteResponseDto,
 } from '../dto/plan-response.dto';
 
 export class PlanMapper {
@@ -41,6 +42,7 @@ export class PlanMapper {
       nombre: plan.nombre,
       indicaciones: plan.indicaciones,
       rutinas: plan.rutinas.map((rutina) => ({
+        id: rutina.id,
         nombre: rutina.nombre,
         dosificaciones: rutina.dosificaciones.map((d) => ({
           ejercicio_id: d.ejercicioId,
@@ -52,6 +54,24 @@ export class PlanMapper {
           rir_objetivo: d.rirObjetivo,
         })),
       })),
+    };
+  }
+  static aVigenteDto(
+    plan: PlanEntrenamiento,
+    asignacion: Asignacion,
+    entrenador: string | null,
+    nombresEjercicios: Map<number, string>,
+  ): PlanVigenteResponseDto {
+    return {
+      id: plan.id,
+      nombre: plan.nombre,
+      indicaciones: plan.indicaciones,
+      entrenador_nombre: entrenador,
+      vigencia: {
+        desde: asignacion.vigencia.desde,
+        hasta: asignacion.vigencia.hasta,
+      },
+      rutinas: PlanMapper.aDetalleDto(plan, nombresEjercicios).rutinas,
     };
   }
 }
