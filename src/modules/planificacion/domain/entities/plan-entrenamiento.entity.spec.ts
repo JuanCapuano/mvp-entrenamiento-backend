@@ -181,4 +181,40 @@ describe('PlanEntrenamiento', () => {
       );
     });
   });
+
+  describe('lo que usa registro (US-15, US-16)', () => {
+    // Las rutinas guardadas tienen id; acá se lo ponemos a mano
+    const planGuardado = () => {
+      const piernas = rutinaCon('Piernas', 7, 3);
+      const pecho = rutinaCon('Pecho', 9);
+      piernas.id = 10;
+      pecho.id = 11;
+      return PlanEntrenamiento.crear(5, 'Fuerza', null, [piernas, pecho]);
+    };
+
+    it('contieneEjercicio: true si el ejercicio está en esa rutina (RN3)', () => {
+      expect(planGuardado().contieneEjercicio(10, 3)).toBe(true);
+    });
+
+    it('contieneEjercicio: false si el ejercicio es de otra rutina del plan (RN3)', () => {
+      expect(planGuardado().contieneEjercicio(10, 9)).toBe(false);
+    });
+
+    it('contieneEjercicio: false si la rutina no es del plan (RN3)', () => {
+      expect(planGuardado().contieneEjercicio(99, 7)).toBe(false);
+    });
+
+    it('dosificacionesDeRutina: devuelve las de la rutina, en orden', () => {
+      const dosificaciones = planGuardado().dosificacionesDeRutina(10);
+      expect(dosificaciones?.map((d) => [d.ejercicioId, d.orden])).toEqual([
+        [7, 1],
+        [3, 2],
+      ]);
+      expect(dosificaciones?.[0].seriesObjetivo).toBe(3);
+    });
+
+    it('dosificacionesDeRutina: null si la rutina no es del plan', () => {
+      expect(planGuardado().dosificacionesDeRutina(99)).toBeNull();
+    });
+  });
 });

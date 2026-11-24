@@ -1,5 +1,6 @@
 import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { DomainException } from '../../../common/exceptions/domain-exceptions';
+import { Dosificacion } from '../value-objects/dosificacion.vo';
 import { Vigencia } from '../value-objects/vigencia.vo';
 import { Asignacion } from './asignacion.entity';
 import { Rutina } from './rutina.entity';
@@ -61,6 +62,20 @@ export class PlanEntrenamiento {
   // Siempre en el orden definido, sin depender de cómo las cargue la base
   rutinasOrdenadas(): Rutina[] {
     return [...this.rutinas].sort((a, b) => a.orden - b.orden);
+  }
+
+  // US-15 (RN3): solo se registran series de ejercicios que pertenecen a una rutina del plan.
+  // Con este método el plan cumple PlanVigenteParaRegistro, el contrato que usa registro.
+  contieneEjercicio(rutinaId: number, ejercicioId: number): boolean {
+    return (this.dosificacionesDeRutina(rutinaId) ?? []).some(
+      (d) => d.ejercicioId === ejercicioId,
+    );
+  }
+
+  // US-16: lo que la rutina le pide al deportista hoy, en orden. null si la rutina no es del plan.
+  dosificacionesDeRutina(rutinaId: number): Dosificacion[] | null {
+    const rutina = (this.rutinas ?? []).find((r) => r.id === rutinaId);
+    return rutina ? rutina.dosificacionesOrdenadas() : null;
   }
 
   // US-08: el plan se asigna a un deportista con su vigencia. Un mismo plan puede tener varias
