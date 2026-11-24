@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { LessThanOrEqual, MoreThanOrEqual, Repository } from 'typeorm';
 import { Asignacion } from '../../domain/entities/asignacion.entity';
 import { PlanEntrenamiento } from '../../domain/entities/plan-entrenamiento.entity';
 import type {
@@ -37,24 +37,46 @@ export class PlanRepository implements IPlanRepository {
   }
 
   // --- Lo que usa el módulo registro ---
-  // PENDIENTE (US-08 asignar plan / US-13 plan vigente): todavía no hay asignaciones, así que
-  // hoy ningún deportista tiene plan vigente. Cuando existan, estas dos consultas tienen que
-  // buscar la asignación cuya vigencia contiene la fecha.
-
-  // US-15 (RN3): mientras tanto, registrar una serie responde "No tenés un plan vigente."
-  async buscarPlanVigenteDelDeportista(
-    _deportistaId: number,
-    _fecha: string,
+  // US-15 (RN3): plan cuya asignación al deportista contiene la fecha (desde <= fecha <= hasta),
+  // con el mismo criterio que PlanesQueryService.buscarPlanVigente.
+  // RN11: las vigencias no se superponen, así que hay como mucho uno (findOne).
+  // RN12: la fecha la pone el servidor (el use case pasa fechaActual()), nunca el cliente.
+  // RN17: se filtra por el deportista del token; nunca se busca el plan de otro.
+  buscarPlanVigenteDelDeportista(
+    deportistaId: number,
+    fecha: string,
   ): Promise<PlanVigenteParaRegistro | null> {
-    return null;
+    return this.buscarPlanVigente(deportistaId, fecha);
   }
 
-  // US-16: mientras tanto, la sesión de hoy responde 403 "La rutina no es de tu plan vigente."
+  // US-16: dosificaciones de la rutina pedida, solo si es del plan vigente del deportista.
+  // null si no tiene plan vigente o la rutina es de otro plan (403 en SesionesQueryService).
+  // RN11, RN12 y RN17: los mismos que buscarPlanVigenteDelDeportista, que es quien busca el plan.
   async buscarDosificacionesDeRutinaVigente(
-    _deportistaId: number,
-    _rutinaId: number,
-    _fecha: string,
+    deportistaId: number,
+    rutinaId: number,
+    fecha: string,
   ): Promise<DosificacionParaRegistro[] | null> {
-    return null;
+    const plan = await this.buscarPlanVigente(deportistaId, fecha);
+    return plan?.dosificacionesDeRutina(rutinaId) ?? null;
+  }
+
+  // Consulta compartida por los dos métodos de arriba (vigencia con extremos incluidos)
+  private buscarPlanVigente(
+    deportistaId: number,
+    fecha: string,
+  ): Promise<PlanEntrenamiento | null> {
+    return this.repository.findOne({
+      where: {
+        asignaciones: {
+          deportistaId,
+          vigencia: {
+            desde: LessThanOrEqual(fecha),
+            hasta: MoreThanOrEqual(fecha),
+          },
+        },
+      },
+      relations: { rutinas: { dosificaciones: true } },
+    });
   }
 }
