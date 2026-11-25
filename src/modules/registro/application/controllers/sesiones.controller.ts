@@ -12,6 +12,7 @@ import type { UsuarioToken } from '../../../gestion-usuario/auth/usuario-actual.
 import { RolNombre } from '../../../gestion-usuario/rol/domain/enums/rol-nombre.enum';
 import { SesionDeHoyQuery } from '../queries/sesion-de-hoy.query';
 import { SesionesQueryService } from '../queries/sesiones.query-service';
+import { SesionesQuery } from '../queries/sesiones.query';
 import { Rol } from '../../../gestion-usuario/rol/domain/entities/rol.entity';
 
 // Consultas del registro de entrenamiento (Paso 11). Sin lógica: el controlador solo delega.
@@ -47,5 +48,26 @@ export class SesionesController {
     ejercicioId: number,
   ) {
     return this.queryService.buscarUltimasSeries(usuario.id, ejercicioId);
+  }
+
+  // GET /api/deportistas/{id}/asistencia?desde&hasta → 200 [{ fecha, rutina, cumplimiento }]
+  // US-12: el entrenador sale del token; el vínculo con el deportista lo verifica el QueryService (RN17)
+  @Get('deportistas/:id/asistencia')
+  @Roles(RolNombre.ENTRENADOR)
+  buscarAsistencia(
+    @UsuarioActual() usuario: UsuarioToken,
+    @Param(
+      'id',
+      new ParseIntPipe({
+        exceptionFactory: () =>
+          new UnprocessableEntityException(
+            'El deportista debe ser un identificador positivo.',
+          ),
+      }),
+    )
+    deportistaId: number,
+    @Query() query: SesionesQuery,
+  ) {
+    return this.queryService.buscarAsistencia(usuario.id, deportistaId, query);
   }
 }
