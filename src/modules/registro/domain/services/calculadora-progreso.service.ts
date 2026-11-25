@@ -1,3 +1,5 @@
+import { Marca } from '../value-objects/marca.vo';
+
 // Lo mínimo de una serie registrada para calcular el progreso: la fecha es la de su sesión
 export interface MarcaDeSerie {
   readonly fecha: string; // YYYY-MM-DD
@@ -5,12 +7,9 @@ export interface MarcaDeSerie {
   readonly repeticiones: number;
 }
 
-export interface Marca {
+export interface RecordPersonal {
   readonly peso: number;
   readonly repeticiones: number;
-}
-
-export interface RecordPersonal extends Marca {
   readonly fecha: string; // primera vez que se logró la marca
 }
 
@@ -19,7 +18,7 @@ export interface ProgresoDeLaFecha {
   readonly fecha: string;
   readonly pesoMaximo: number;
   readonly rmEstimado: number; // 1RM de Epley, el mayor del día, con 1 decimal (RN16)
-  readonly mejorSerie: Marca; // RN9: más peso; a igual peso, más repeticiones
+  readonly mejorSerie: { readonly peso: number; readonly repeticiones: number }; // RN9 (Marca.superaA)
   readonly volumen: number; // Σ peso × repeticiones, en kg
 }
 
@@ -43,11 +42,10 @@ export class CalculadoraProgreso {
     return this.redondear(peso * (1 + repeticiones / 30), 1);
   }
 
-  // RN9: más peso gana; a igual peso, más repeticiones. El RIR no cuenta.
-  esMejorMarca(marca: Marca, otra: Marca): boolean {
-    return (
-      marca.peso > otra.peso ||
-      (marca.peso === otra.peso && marca.repeticiones > otra.repeticiones)
+  // RN9 la decide el value object Marca: acá solo se elige cuál de las dos series es mejor
+  private esMejor(serie: MarcaDeSerie, otra: MarcaDeSerie): boolean {
+    return Marca.crear(serie.peso, serie.repeticiones).superaA(
+      Marca.crear(otra.peso, otra.repeticiones),
     );
   }
 
@@ -55,7 +53,7 @@ export class CalculadoraProgreso {
   private record(series: readonly MarcaDeSerie[]): RecordPersonal | null {
     let record: MarcaDeSerie | null = null;
     for (const serie of this.ordenadasPorFecha(series)) {
-      if (!record || this.esMejorMarca(serie, record)) record = serie;
+      if (!record || this.esMejor(serie, record)) record = serie;
     }
     return record
       ? {
@@ -82,7 +80,7 @@ export class CalculadoraProgreso {
     series: readonly MarcaDeSerie[],
   ): ProgresoDeLaFecha {
     const mejor = series.reduce((mejorHastaAhora, serie) =>
-      this.esMejorMarca(serie, mejorHastaAhora) ? serie : mejorHastaAhora,
+      this.esMejor(serie, mejorHastaAhora) ? serie : mejorHastaAhora,
     );
     return {
       fecha,

@@ -179,13 +179,4 @@ describe('CalculadoraProgreso (US-19)', () => {
   it('si nunca hizo el ejercicio no hay récord ni fechas', () => {
     expect(calculadora.calcular([])).toEqual({ record: null, porFecha: [] });
   });
-
-  it('una marca igual no es mejor (no supera, empata)', () => {
-    expect(
-      calculadora.esMejorMarca(
-        { peso: 60, repeticiones: 8 },
-        { peso: 60, repeticiones: 8 },
-      ),
-    ).toBe(false);
-  });
 });
