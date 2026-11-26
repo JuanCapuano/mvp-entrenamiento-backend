@@ -11,6 +11,8 @@ import { GlobalExceptionFilter } from '../src/modules/common/filters/global-exce
 import { AuthGuard } from '../src/modules/gestion-usuario/auth/auth.guard';
 import { RolNombre } from '../src/modules/gestion-usuario/rol/domain/enums/rol-nombre.enum';
 import { IPlanRepositoryToken } from '../src/modules/planificacion/domain/interfaces/plan.repository-interface';
+import { IEjercicioRepositoryToken } from '../src/modules/catalogo/domain/interfaces/ejercicio.repository-interface';
+import { EjercicioRepositoryEnMemoria } from './repositorios-en-memoria/ejercicio.repository-en-memoria';
 import { IPublicadorEventosRegistroToken } from '../src/modules/registro/application/publicador-eventos-registro.interface';
 import { FECHA_ACTUAL_REGISTRO } from '../src/modules/registro/application/use-cases/registrar-serie.use-case';
 import { Serie } from '../src/modules/registro/domain/entities/serie.entity';
@@ -82,8 +84,17 @@ describe('GET /api/sesiones/hoy (US-16)', () => {
           provide: IPublicadorEventosRegistroToken,
           useValue: { emit: () => true },
         },
+        // US-20: SesionesQueryService pide el nombre de los ejercicios al catálogo
+        {
+          provide: IEjercicioRepositoryToken,
+          useValue: new EjercicioRepositoryEnMemoria(),
+        },
       ],
-      exports: [IPlanRepositoryToken, IPublicadorEventosRegistroToken],
+      exports: [
+        IPlanRepositoryToken,
+        IPublicadorEventosRegistroToken,
+        IEjercicioRepositoryToken,
+      ],
     })
     class DependenciasDePruebaModule {}
 

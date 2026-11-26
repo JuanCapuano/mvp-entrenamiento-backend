@@ -11,15 +11,28 @@ import { UsuarioActual } from '../../../gestion-usuario/auth/usuario-actual.deco
 import type { UsuarioToken } from '../../../gestion-usuario/auth/usuario-actual.decorator';
 import { RolNombre } from '../../../gestion-usuario/rol/domain/enums/rol-nombre.enum';
 import { SesionDeHoyQuery } from '../queries/sesion-de-hoy.query';
-import { SesionesQueryService } from '../queries/sesiones.query-service';
+import { SesionesQueryService } from '../queries/sesiones-query.service';
 import { SesionesQuery } from '../queries/sesiones.query';
 import { Rol } from '../../../gestion-usuario/rol/domain/entities/rol.entity';
+import { BuscarSesionesDto } from '../../dto/buscar-sesiones.dto';
+import { BuscarSesionesQueryFactory } from '../factories/buscar-sesiones.query-factory';
 
 // Consultas del registro de entrenamiento (Paso 11). Sin lógica: el controlador solo delega.
 // Las rutas no comparten prefijo, así que cada una declara la suya completa.
 @Controller()
 export class SesionesController {
   constructor(private readonly queryService: SesionesQueryService) {}
+
+  // GET /api/sesiones?desde&hasta → 200 [{ fecha, rutina, cumplimiento, ejercicios: [{ nombre, cumplimiento, series[] }] }]
+  @Get('sesiones')
+  @Roles(RolNombre.DEPORTISTA)
+  buscarSesiones(
+    @UsuarioActual() usuario: UsuarioToken,
+    @Query() dto: BuscarSesionesDto,
+  ) {
+    const query = BuscarSesionesQueryFactory.crear(usuario.id, dto);
+    return this.queryService.buscarSesiones(query);
+  }
 
   // GET /api/sesiones/hoy?rutina_id → 200 { cumplimiento, ejercicios: [{ ejercicio_id, series_objetivo, series[] }] }
   @Get('sesiones/hoy')

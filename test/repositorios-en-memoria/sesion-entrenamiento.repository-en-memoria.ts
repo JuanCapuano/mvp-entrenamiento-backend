@@ -2,6 +2,7 @@ import { SesionEntrenamiento } from '../../src/modules/registro/domain/entities/
 import { Serie } from '../../src/modules/registro/domain/entities/serie.entity';
 import type { ISesionEntrenamientoRepository } from '../../src/modules/registro/domain/interfaces/sesion-entrenamiento.repository-interface';
 import { RegistroConcurrenteException } from '../../src/modules/registro/domain/exceptions/registro-concurrente.exception';
+import type { BuscarSesionesQuery } from '../../src/modules/registro/application/queries/buscar-sesiones.query';
 
 function copiar(sesion: SesionEntrenamiento): SesionEntrenamiento {
   return Object.assign(new SesionEntrenamiento(), sesion, {
@@ -41,6 +42,18 @@ export class SesionEntrenamientoRepositoryEnMemoria implements ISesionEntrenamie
           (serie) => serie.ejercicioId === ejercicioId,
         ),
       );
+  }
+
+  async buscarSesiones({ deportistaId, desde, hasta }: BuscarSesionesQuery) {
+    return [...this.sesiones.values()]
+      .filter(
+        (sesion) =>
+          sesion.deportistaId === deportistaId &&
+          (!desde || sesion.fecha >= desde) &&
+          (!hasta || sesion.fecha <= hasta),
+      )
+      .sort((a, b) => b.fecha.localeCompare(a.fecha) || b.id - a.id)
+      .map(copiar);
   }
 
   async guardar(sesion: SesionEntrenamiento) {

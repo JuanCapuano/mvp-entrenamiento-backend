@@ -27,6 +27,8 @@ import { Repeticiones } from '../src/modules/registro/domain/value-objects/repet
 import { RIR } from '../src/modules/registro/domain/value-objects/rir.vo';
 import { RegistroModule } from '../src/modules/registro/registro.module';
 import { PlanRepositoryEnMemoria } from './repositorios-en-memoria/plan.repository-en-memoria';
+import { IEjercicioRepositoryToken } from '../src/modules/catalogo/domain/interfaces/ejercicio.repository-interface';
+import { EjercicioRepositoryEnMemoria } from './repositorios-en-memoria/ejercicio.repository-en-memoria';
 
 // US-19: GET /api/progreso y GET /api/progreso/ejercicios contra MySQL real.
 // El progreso no depende del plan vigente: planificación se reemplaza por su repositorio en memoria.
@@ -70,8 +72,17 @@ describe('Progreso del deportista (US-19)', () => {
           provide: IPublicadorEventosRegistroToken,
           useValue: { emit: () => true },
         },
+        // US-20: SesionesQueryService pide el nombre de los ejercicios al catálogo
+        {
+          provide: IEjercicioRepositoryToken,
+          useValue: new EjercicioRepositoryEnMemoria(),
+        },
       ],
-      exports: [IPlanRepositoryToken, IPublicadorEventosRegistroToken],
+      exports: [
+        IPlanRepositoryToken,
+        IPublicadorEventosRegistroToken,
+        IEjercicioRepositoryToken,
+      ],
     })
     class DependenciasDePruebaModule {}
 

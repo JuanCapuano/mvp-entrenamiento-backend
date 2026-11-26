@@ -5,6 +5,7 @@ import { SesionEntrenamiento } from '../../domain/entities/sesion-entrenamiento.
 import { Serie } from '../../domain/entities/serie.entity';
 import type { ISesionEntrenamientoRepository } from '../../domain/interfaces/sesion-entrenamiento.repository-interface';
 import { RegistroConcurrenteException } from '../../domain/exceptions/registro-concurrente.exception';
+import type { BuscarSesionesQuery } from '../../application/queries/buscar-sesiones.query';
 
 @Injectable()
 export class SesionEntrenamientoRepository implements ISesionEntrenamientoRepository {
@@ -46,6 +47,31 @@ export class SesionEntrenamientoRepository implements ISesionEntrenamientoReposi
     return this.series.find({
       where: { ejercicioId, sesion: { deportistaId } },
     });
+  }
+
+  // US-20: cada filtro que viene con valor agrega su condición (extremos incluidos).
+  // Dos sesiones el mismo día (doble turno): primero la que se empezó última.
+  buscarSesiones({
+    deportistaId,
+    desde,
+    hasta,
+  }: BuscarSesionesQuery): Promise<SesionEntrenamiento[]> {
+    const qb = this.sesiones
+      .createQueryBuilder('sesion')
+      .leftJoinAndSelect('sesion.seriesRegistradas', 'serie')
+      .where('sesion.deportistaId = :deportistaId', { deportistaId });
+
+    if (desde) {
+      qb.andWhere('sesion.fecha >= :desde', { desde });
+    }
+    if (hasta) {
+      qb.andWhere('sesion.fecha <= :hasta', { hasta });
+    }
+
+    return qb
+      .orderBy('sesion.fecha', 'DESC')
+      .addOrderBy('sesion.id', 'DESC')
+      .getMany();
   }
 
   async guardar(sesion: SesionEntrenamiento): Promise<SesionEntrenamiento> {
