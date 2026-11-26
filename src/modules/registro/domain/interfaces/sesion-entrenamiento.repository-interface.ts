@@ -1,5 +1,6 @@
 import type { SesionEntrenamiento } from '../entities/sesion-entrenamiento.entity';
 import type { Serie } from '../entities/serie.entity';
+import type { BuscarSesionesQuery } from '../../application/queries/buscar-sesiones.query';
 
 export const ISesionEntrenamientoRepositoryToken =
   'ISesionEntrenamientoRepository';
@@ -17,4 +18,7 @@ export interface ISesionEntrenamientoRepository {
     ejercicioId: number,
   ): Promise<Serie[]>;
   guardar(sesion: SesionEntrenamiento): Promise<SesionEntrenamiento>;
+  // US-20 (lo usa SesionesQueryService): sesiones del deportista con sus series, filtradas por
+  // query.desde / query.hasta, de la más reciente a la más antigua
+  buscarSesiones(query: BuscarSesionesQuery): Promise<SesionEntrenamiento[]>;
 }

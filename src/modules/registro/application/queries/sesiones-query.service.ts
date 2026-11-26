@@ -3,12 +3,22 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import type { IPlanRepository } from '../../../planificacion/domain/interfaces/plan.repository-interface';
 import { IPlanRepositoryToken } from '../../../planificacion/domain/interfaces/plan.repository-interface';
+import type { IEjercicioRepository } from '../../../catalogo/domain/interfaces/ejercicio.repository-interface';
+import { IEjercicioRepositoryToken } from '../../../catalogo/domain/interfaces/ejercicio.repository-interface';
 import { SesionEntrenamiento } from '../../domain/entities/sesion-entrenamiento.entity';
 import { Serie } from '../../domain/entities/serie.entity';
+import type { ISesionEntrenamientoRepository } from '../../domain/interfaces/sesion-entrenamiento.repository-interface';
+import { ISesionEntrenamientoRepositoryToken } from '../../domain/interfaces/sesion-entrenamiento.repository-interface';
+import { BuscarSesionesQuery } from './buscar-sesiones.query';
 import { CalculadoraCumplimiento } from '../../domain/services/calculadora-cumplimiento.service';
 import { SesionDeHoyResponseDto } from '../../dto/sesion-de-hoy-response.dto';
+import { SesionHistorialResponseDto } from '../../dto/sesion-historial-response.dto';
 import { UltimasSeriesResponseDto } from '../../dto/ultimas-series-response.dto';
 import { SesionDeHoyMapper } from '../../mappers/sesion-de-hoy.mapper';
+import {
+  SesionHistorialMapper,
+  type RutinaDeLaSesion,
+} from '../../mappers/sesion-historial.mapper';
 import { UltimasSeriesMapper } from '../../mappers/ultimas-series.mapper';
 import { FECHA_ACTUAL_REGISTRO } from '../use-cases/registrar-serie.use-case';
 
@@ -31,7 +41,81 @@ export class SesionesQueryService {
     private readonly planes: IPlanRepository,
 
     private readonly calculadoraCumplimiento: CalculadoraCumplimiento,
+
+    // US-20: las sesiones se leen por la interfaz del repositorio, no con TypeORM directo
+    @Inject(ISesionEntrenamientoRepositoryToken)
+    private readonly repositorioSesiones: ISesionEntrenamientoRepository,
+
+    // Nombre de cada ejercicio: es del catálogo, se pide por su interfaz
+    @Inject(IEjercicioRepositoryToken)
+    private readonly ejercicios: IEjercicioRepository,
   ) {}
+
+  // US-20 (CU10): sesiones del deportista de la más reciente a la más antigua, con la rutina,
+  // las series agrupadas por ejercicio y el cumplimiento de la sesión y de cada ejercicio.
+  // RN17: el deportista viene en el query (lo pone BuscarSesionesQueryFactory desde el token).
+  async buscarSesiones(
+    query: BuscarSesionesQuery,
+  ): Promise<SesionHistorialResponseDto[]> {
+    const sesiones = await this.repositorioSesiones.buscarSesiones(query);
+    if (sesiones.length === 0) return [];
+
+    const rutinas = await this.buscarRutinasDeLasSesiones(sesiones);
+    const nombresEjercicios = await this.buscarNombresEjercicios([
+      ...rutinas.values(),
+    ]);
+
+    return sesiones.map((sesion) =>
+      SesionHistorialMapper.aDto(
+        sesion,
+        rutinas.get(sesion.rutinaId) ?? null,
+        nombresEjercicios,
+        this.calculadoraCumplimiento,
+      ),
+    );
+  }
+
+  // Rutina (nombre y dosificaciones) de cada sesión, por id de rutina. Puede ser de un plan que
+  // ya no está vigente, así que se busca por el plan de la sesión (un pedido por plan).
+  private async buscarRutinasDeLasSesiones(
+    sesiones: SesionEntrenamiento[],
+  ): Promise<Map<number, RutinaDeLaSesion>> {
+    const planIds = [...new Set(sesiones.map((sesion) => sesion.planId))];
+    const planes = await Promise.all(
+      planIds.map((planId) => this.planes.buscarPorId(planId)),
+    );
+
+    const rutinas = new Map<number, RutinaDeLaSesion>();
+    for (const rutina of planes.flatMap((plan) => plan?.rutinas ?? [])) {
+      rutinas.set(rutina.id, {
+        nombre: rutina.nombre,
+        dosificaciones: rutina.dosificacionesOrdenadas(),
+      });
+    }
+    return rutinas;
+  }
+
+  // ejercicioId → nombre, un pedido por ejercicio distinto de las rutinas
+  private async buscarNombresEjercicios(
+    rutinas: RutinaDeLaSesion[],
+  ): Promise<Map<number, string>> {
+    const ids = [
+      ...new Set(
+        rutinas.flatMap((rutina) =>
+          rutina.dosificaciones.map((d) => d.ejercicioId),
+        ),
+      ),
+    ];
+    const ejercicios = await Promise.all(
+      ids.map((id) => this.ejercicios.buscarPorId(id)),
+    );
+
+    return new Map(
+      ejercicios
+        .filter((ejercicio) => ejercicio !== null)
+        .map((ejercicio) => [ejercicio.id, ejercicio.nombre]),
+    );
+  }
 
   // US-16: series que el deportista lleva hoy en cada ejercicio de la rutina, frente a las
   // series objetivo, y el cumplimiento de la sesión. Si hoy no registró nada, 0 % y sin series.
@@ -96,5 +180,4 @@ export class SesionesQueryService {
 
     return UltimasSeriesMapper.aDto(ultima.fecha, series);
   }
-
 }

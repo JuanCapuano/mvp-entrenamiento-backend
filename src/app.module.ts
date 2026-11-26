@@ -41,7 +41,12 @@ import { EventosModule } from './modules/common/eventos/eventos.module';
     PlanificacionModule,
     MedicionesModule,
     // Registro necesita el plan vigente (planificación) y el publicador de eventos
-    RegistroModule.conDependencias([PlanificacionModule, EventosModule]),
+    // US-20: y el nombre de los ejercicios (catálogo)
+    RegistroModule.conDependencias([
+      PlanificacionModule,
+      EventosModule,
+      CatalogoModule,
+    ]),
   ],
 })
 export class AppModule {}

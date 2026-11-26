@@ -17,7 +17,7 @@ import {
 import { CorregirSerieUseCase } from './application/use-cases/corregir-serie.use-case';
 import { SeriesController } from './application/controllers/series.controller';
 import { SesionesController } from './application/controllers/sesiones.controller';
-import { SesionesQueryService } from './application/queries/sesiones.query-service';
+import { SesionesQueryService } from './application/queries/sesiones-query.service';
 
 @Module({})
 export class RegistroModule {

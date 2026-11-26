@@ -14,6 +14,8 @@ import { SesionEntrenamiento } from '../src/modules/registro/domain/entities/ses
 import { Serie } from '../src/modules/registro/domain/entities/serie.entity';
 import { ISesionEntrenamientoRepositoryToken } from '../src/modules/registro/domain/interfaces/sesion-entrenamiento.repository-interface';
 import { IPlanRepositoryToken } from '../src/modules/planificacion/domain/interfaces/plan.repository-interface';
+import { IEjercicioRepositoryToken } from '../src/modules/catalogo/domain/interfaces/ejercicio.repository-interface';
+import { EjercicioRepositoryEnMemoria } from './repositorios-en-memoria/ejercicio.repository-en-memoria';
 import { IPublicadorEventosRegistroToken } from '../src/modules/registro/application/publicador-eventos-registro.interface';
 import { FECHA_ACTUAL_REGISTRO } from '../src/modules/registro/application/use-cases/registrar-serie.use-case';
 import { SesionEntrenamientoFactory } from '../src/modules/registro/domain/factories/sesion-entrenamiento.factory';
@@ -58,8 +60,17 @@ describe('POST /api/series (US-15)', () => {
           provide: IPublicadorEventosRegistroToken,
           useValue: { emit: () => true },
         },
+        // US-20: SesionesQueryService pide el nombre de los ejercicios al catálogo
+        {
+          provide: IEjercicioRepositoryToken,
+          useValue: new EjercicioRepositoryEnMemoria(),
+        },
       ],
-      exports: [IPlanRepositoryToken, IPublicadorEventosRegistroToken],
+      exports: [
+        IPlanRepositoryToken,
+        IPublicadorEventosRegistroToken,
+        IEjercicioRepositoryToken,
+      ],
     })
     class DependenciasDePruebaModule {}
 
