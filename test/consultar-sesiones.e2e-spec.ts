@@ -226,7 +226,7 @@ describe('GET /api/sesiones (US-20)', () => {
       .set('Authorization', `Bearer ${token}`);
   }
 
-  it('devuelve las sesiones de la más reciente a la más antigua, con las series agrupadas por ejercicio y el cumplimiento', async () => {
+  it('devuelve las sesiones de la más reciente a la más antigua, con las series agrupadas por ejercicio, el cumplimiento y los récords', async () => {
     await guardarSesion(JUAN_ID, PIERNAS, '2026-10-07', [
       [SENTADILLA, 60, 8, 2],
       [SENTADILLA, 62.5, 7, 1],
@@ -247,7 +247,16 @@ describe('GET /api/sesiones (US-20)', () => {
           {
             nombre: 'Press de banca',
             cumplimiento: 33,
-            series: [{ numero: 1, peso: 50, repeticiones: 10, rir: 2 }],
+            // Primera vez que hace el ejercicio: no hay marca anterior, no es récord
+            series: [
+              {
+                numero: 1,
+                peso: 50,
+                repeticiones: 10,
+                rir: 2,
+                record_personal: false,
+              },
+            ],
           },
         ],
       },
@@ -261,14 +270,35 @@ describe('GET /api/sesiones (US-20)', () => {
             nombre: 'Sentadilla',
             cumplimiento: 67,
             series: [
-              { numero: 1, peso: 60, repeticiones: 8, rir: 2 },
-              { numero: 2, peso: 62.5, repeticiones: 7, rir: 1 },
+              {
+                numero: 1,
+                peso: 60,
+                repeticiones: 8,
+                rir: 2,
+                record_personal: false,
+              },
+              // Supera los 60 kg de la serie 1 (RN9)
+              {
+                numero: 2,
+                peso: 62.5,
+                repeticiones: 7,
+                rir: 1,
+                record_personal: true,
+              },
             ],
           },
           {
             nombre: 'Peso muerto',
             cumplimiento: 33,
-            series: [{ numero: 1, peso: 80, repeticiones: 5, rir: 2 }],
+            series: [
+              {
+                numero: 1,
+                peso: 80,
+                repeticiones: 5,
+                rir: 2,
+                record_personal: false,
+              },
+            ],
           },
         ],
       },
