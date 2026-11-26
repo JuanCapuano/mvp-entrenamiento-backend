@@ -12,11 +12,13 @@ export interface RutinaDeLaSesion {
 export class SesionHistorialMapper {
   // Una sesión con un ejercicio por dosificación, en el orden de la rutina, y sus series.
   // El cumplimiento lo calcula CalculadoraCumplimiento, igual que en la sesión de hoy.
+  // seriesRecord: ids de las series que fueron récord personal (los decide DetectorRecordPersonal).
   static aDto(
     sesion: SesionEntrenamiento,
     rutina: RutinaDeLaSesion | null,
     nombresEjercicios: ReadonlyMap<number, string>,
     calculadora: CalculadoraCumplimiento,
+    seriesRecord: ReadonlySet<number>,
   ): SesionHistorialResponseDto {
     const dosificaciones = [...(rutina?.dosificaciones ?? [])].sort(
       (a, b) => a.orden - b.orden,
@@ -42,6 +44,7 @@ export class SesionHistorialMapper {
             peso: serie.peso.valor,
             repeticiones: serie.repeticiones.valor,
             rir: serie.rir.valor,
+            record_personal: seriesRecord.has(serie.id),
           })),
         };
       }),

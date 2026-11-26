@@ -11,6 +11,7 @@ import type { ISesionEntrenamientoRepository } from '../../domain/interfaces/ses
 import { ISesionEntrenamientoRepositoryToken } from '../../domain/interfaces/sesion-entrenamiento.repository-interface';
 import { BuscarSesionesQuery } from './buscar-sesiones.query';
 import { CalculadoraCumplimiento } from '../../domain/services/calculadora-cumplimiento.service';
+import { DetectorRecordPersonal } from '../../domain/services/detector-record-personal.service';
 import { SesionDeHoyResponseDto } from '../../dto/sesion-de-hoy-response.dto';
 import { SesionHistorialResponseDto } from '../../dto/sesion-historial-response.dto';
 import { UltimasSeriesResponseDto } from '../../dto/ultimas-series-response.dto';
@@ -49,6 +50,9 @@ export class SesionesQueryService {
     // Nombre de cada ejercicio: es del catálogo, se pide por su interfaz
     @Inject(IEjercicioRepositoryToken)
     private readonly ejercicios: IEjercicioRepository,
+
+    // US-20: marcar las series que fueron récord personal (RN9), con la misma regla que al registrar
+    private readonly detectorRecord: DetectorRecordPersonal,
   ) {}
 
   // US-20 (CU10): sesiones del deportista de la más reciente a la más antigua, con la rutina,
@@ -64,6 +68,10 @@ export class SesionesQueryService {
     const nombresEjercicios = await this.buscarNombresEjercicios([
       ...rutinas.values(),
     ]);
+    const seriesRecord = await this.buscarSeriesRecord(
+      query.deportistaId,
+      sesiones,
+    );
 
     return sesiones.map((sesion) =>
       SesionHistorialMapper.aDto(
@@ -71,8 +79,45 @@ export class SesionesQueryService {
         rutinas.get(sesion.rutinaId) ?? null,
         nombresEjercicios,
         this.calculadoraCumplimiento,
+        seriesRecord,
       ),
     );
+  }
+
+  // Ids de las series que, cuando se registraron, superaron a todas las anteriores del ejercicio
+  // (RN9). Se mira todo el historial del deportista, no solo el rango pedido: una serie del rango
+  // puede haber superado una marca de antes. Las series se registran siempre el día de hoy (RN12),
+  // así que el orden de id es el orden en que se hicieron.
+  private async buscarSeriesRecord(
+    deportistaId: number,
+    sesiones: SesionEntrenamiento[],
+  ): Promise<Set<number>> {
+    const ejercicioIds = [
+      ...new Set(
+        sesiones.flatMap((sesion) =>
+          sesion.series.map((serie) => serie.ejercicioId),
+        ),
+      ),
+    ];
+    const historiales = await Promise.all(
+      ejercicioIds.map((ejercicioId) =>
+        this.repositorioSesiones.buscarSeriesDelEjercicio(
+          deportistaId,
+          ejercicioId,
+        ),
+      ),
+    );
+
+    const records = new Set<number>();
+    for (const historial of historiales) {
+      const enOrden = [...historial].sort((a, b) => a.id - b.id);
+      enOrden.forEach((serie, i) => {
+        if (this.detectorRecord.superaRecord(serie, enOrden.slice(0, i))) {
+          records.add(serie.id);
+        }
+      });
+    }
+    return records;
   }
 
   // Rutina (nombre y dosificaciones) de cada sesión, por id de rutina. Puede ser de un plan que

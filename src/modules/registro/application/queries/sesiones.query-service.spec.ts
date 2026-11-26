@@ -8,6 +8,7 @@ import {
 import { PlanEntrenamientoFactory } from '../../../planificacion/domain/factories/plan-entrenamiento.factory';
 import { SesionEntrenamientoFactory } from '../../domain/factories/sesion-entrenamiento.factory';
 import { CalculadoraCumplimiento } from '../../domain/services/calculadora-cumplimiento.service';
+import { DetectorRecordPersonal } from '../../domain/services/detector-record-personal.service';
 import { Peso } from '../../domain/value-objects/peso.vo';
 import { Repeticiones } from '../../domain/value-objects/repeticiones.vo';
 import { RIR } from '../../domain/value-objects/rir.vo';
@@ -111,6 +112,7 @@ describe('SesionesQueryService.buscarSesiones (US-20)', () => {
         ejercicio(SENTADILLA, 'Sentadilla'),
         ejercicio(PRESS_BANCA, 'Press de banca'),
       ]),
+      new DetectorRecordPersonal(),
     );
   });
 
@@ -137,8 +139,21 @@ describe('SesionesQueryService.buscarSesiones (US-20)', () => {
         nombre: 'Sentadilla',
         cumplimiento: 67,
         series: [
-          { numero: 1, peso: 60, repeticiones: 8, rir: 2 },
-          { numero: 2, peso: 60, repeticiones: 8, rir: 2 },
+          // Igualan la marca del 20/09, no la superan: no son récord
+          {
+            numero: 1,
+            peso: 60,
+            repeticiones: 8,
+            rir: 2,
+            record_personal: false,
+          },
+          {
+            numero: 2,
+            peso: 60,
+            repeticiones: 8,
+            rir: 2,
+            record_personal: false,
+          },
         ],
       },
     ]);
@@ -181,6 +196,65 @@ describe('SesionesQueryService.buscarSesiones (US-20)', () => {
     const resultado = await servicio.buscarSesiones({ deportistaId: JUAN });
 
     expect(resultado.map((sesion) => sesion.rutina)).toEqual(['Torso']);
+  });
+
+  it('marca las series que fueron récord personal, comparando con todo el historial (RN9)', async () => {
+    // Sentadilla: 60×8 (primera marca, no es récord), 65×8 (récord), 65×6 (no), 65×9 (récord)
+    const series: [string, number, number][] = [
+      ['2026-09-20', 60, 8],
+      ['2026-10-07', 65, 8],
+      ['2026-10-14', 65, 6],
+      ['2026-10-14', 65, 9],
+    ];
+    const porFecha = new Map<
+      string,
+      ReturnType<SesionEntrenamientoFactory['crear']>
+    >();
+    for (const [fecha, peso, repeticiones] of series) {
+      const valores = [
+        Peso.crear(peso),
+        Repeticiones.crear(repeticiones),
+        RIR.crear(1),
+      ] as const;
+      const sesion =
+        (await sesiones.buscarDelDia(JUAN, 20, fecha)) ?? porFecha.get(fecha);
+      if (sesion) {
+        sesion.registrarSerie(JUAN, fecha, SENTADILLA, ...valores);
+        porFecha.set(fecha, await sesiones.guardar(sesion));
+      } else {
+        const nueva = new SesionEntrenamientoFactory().crear(
+          JUAN,
+          2,
+          20,
+          fecha,
+          SENTADILLA,
+          ...valores,
+        );
+        porFecha.set(fecha, await sesiones.guardar(nueva));
+      }
+    }
+
+    // El 20/09 queda fuera del rango, pero cuenta como marca anterior
+    const resultado = await servicio.buscarSesiones({
+      deportistaId: JUAN,
+      desde: '2026-10-01',
+    });
+
+    expect(
+      resultado.map((sesion) =>
+        sesion.ejercicios[0].series.map((serie) => [
+          serie.peso,
+          serie.repeticiones,
+          serie.record_personal,
+        ]),
+      ),
+    ).toEqual([
+      [
+        [65, 6, false],
+        [65, 9, true],
+      ],
+      [[65, 8, true]],
+    ]);
   });
 
   it('sin sesiones en el rango, devuelve una lista vacía', async () => {

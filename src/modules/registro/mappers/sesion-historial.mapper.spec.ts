@@ -39,8 +39,11 @@ const nombres = new Map([
 
 describe('SesionHistorialMapper (US-20)', () => {
   it('muestra fecha, rutina y las series agrupadas por ejercicio en el orden de la rutina', () => {
+    const sesion = sesionDePiernas();
+    // Ids como los que pone la base; la serie 2 fue récord personal
+    sesion.series.forEach((serie, i) => Object.assign(serie, { id: i + 1 }));
     const dto = SesionHistorialMapper.aDto(
-      sesionDePiernas(),
+      sesion,
       {
         nombre: 'Piernas',
         // Desordenadas a propósito: manda el orden de la rutina
@@ -51,6 +54,7 @@ describe('SesionHistorialMapper (US-20)', () => {
       },
       nombres,
       new CalculadoraCumplimiento(),
+      new Set([2]),
     );
 
     expect(dto).toEqual({
@@ -63,8 +67,20 @@ describe('SesionHistorialMapper (US-20)', () => {
           nombre: 'Sentadilla',
           cumplimiento: 50,
           series: [
-            { numero: 1, peso: 60, repeticiones: 8, rir: 2 },
-            { numero: 2, peso: 62.5, repeticiones: 6, rir: 1 },
+            {
+              numero: 1,
+              peso: 60,
+              repeticiones: 8,
+              rir: 2,
+              record_personal: false,
+            },
+            {
+              numero: 2,
+              peso: 62.5,
+              repeticiones: 6,
+              rir: 1,
+              record_personal: true,
+            },
           ],
         },
         { nombre: 'Peso muerto', cumplimiento: 0, series: [] },
@@ -79,6 +95,7 @@ describe('SesionHistorialMapper (US-20)', () => {
         null,
         nombres,
         new CalculadoraCumplimiento(),
+        new Set(),
       ),
     ).toEqual({ fecha: FECHA, rutina: '', cumplimiento: 0, ejercicios: [] });
   });

@@ -5,6 +5,7 @@ export class SerieHistorialResponseDto {
   peso: number; // kg; 0 = peso corporal
   repeticiones: number;
   rir: number;
+  record_personal: boolean; // true si al registrarla superó a todas las anteriores del ejercicio (RN9)
 }
 
 export class EjercicioHistorialResponseDto {
