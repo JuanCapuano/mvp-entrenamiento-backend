@@ -18,6 +18,9 @@ import { CorregirSerieUseCase } from './application/use-cases/corregir-serie.use
 import { SeriesController } from './application/controllers/series.controller';
 import { SesionesController } from './application/controllers/sesiones.controller';
 import { SesionesQueryService } from './application/queries/sesiones-query.service';
+import { CalculadoraProgreso } from './domain/services/calculadora-progreso.service';
+import { ProgresoQueryService } from './application/queries/progreso.query-service';
+import { ProgresoController } from './application/controllers/progreso.controller';
 
 @Module({})
 export class RegistroModule {
@@ -32,7 +35,7 @@ export class RegistroModule {
         TypeOrmModule.forFeature([SesionEntrenamiento, Serie]),
         ...imports,
       ],
-      controllers: [SeriesController, SesionesController],
+      controllers: [SeriesController, SesionesController, ProgresoController],
       providers: [
         {
           provide: ISesionEntrenamientoRepositoryToken,
@@ -46,6 +49,8 @@ export class RegistroModule {
         RegistrarSerieUseCase,
         CorregirSerieUseCase,
         SesionesQueryService,
+        CalculadoraProgreso,
+        ProgresoQueryService,
       ],
       exports: [ISesionEntrenamientoRepositoryToken],
     };
