@@ -142,6 +142,8 @@ describe('POST /api/deportistas (US-03)', () => {
       id: juanId,
       nombre: 'Juan Pérez',
       email: JUAN.email,
+      // Recién vinculado: todavía no tiene un plan asignado por este entrenador
+      plan_vigente: null,
     });
 
     // Se lee con el mismo repositorio que usa la app, sacado del contenedor de Nest

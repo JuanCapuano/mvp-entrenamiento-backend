@@ -34,15 +34,17 @@ describe('DeportistaUseCase (US-03)', () => {
     expect(guardada?.entrenadorId).toBe(LAURA_ID);
   });
 
-  it('devuelve el id, el nombre y el email del deportista', async () => {
+  it('devuelve el id, el nombre y el email del deportista, sin plan vigente', async () => {
     const respuesta = await useCase.execute(LAURA_ID, {
       email: 'sofia@gym.com',
     });
 
+    // Recién vinculado: todavía no tiene un plan asignado por este entrenador
     expect(respuesta).toEqual({
       id: 4,
       nombre: 'Sofía Ruiz',
       email: 'sofia@gym.com',
+      plan_vigente: null,
     });
   });
 
