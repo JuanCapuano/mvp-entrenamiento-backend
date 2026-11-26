@@ -59,8 +59,8 @@ export class UsuarioQueryService {
         a
           ? {
               nombre: a.plan.nombre,
-              desde: a.vigencia.desde,
-              hasta: a.vigencia.hasta,  
+              vigencia_desde: a.vigencia.desde,
+              vigencia_hasta: a.vigencia.hasta,
             }
           : null,
       );

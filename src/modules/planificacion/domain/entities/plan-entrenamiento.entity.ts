@@ -44,6 +44,9 @@ export class PlanEntrenamiento {
     }
     if (rutinas.length === 0) {
       throw new DomainException('El plan tiene que tener al menos una rutina.');
+    }// RN10: máximo 7 rutinas por plan (una por día de la semana)
+    if (rutinas.length > 7) {
+      throw new DomainException('El plan puede tener hasta 7 rutinas.');
     }
 
     const plan = new PlanEntrenamiento();

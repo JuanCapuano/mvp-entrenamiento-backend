@@ -39,6 +39,20 @@ describe('PlanEntrenamiento', () => {
     );
   });
 
+  it('acepta hasta 7 rutinas', () => {
+    const rutinas = Array.from({ length: 7 }, () => rutina());
+    expect(
+      PlanEntrenamiento.crear(5, 'Fuerza', null, rutinas).rutinas,
+    ).toHaveLength(7);
+  });
+
+  it('rechaza un plan con más de 7 rutinas', () => {
+    const rutinas = Array.from({ length: 8 }, () => rutina());
+    expect(() => PlanEntrenamiento.crear(5, 'Fuerza', null, rutinas)).toThrow(
+      new DomainException('El plan puede tener hasta 7 rutinas.'),
+    );
+  });
+
   it('las indicaciones son opcionales', () => {
     expect(
       PlanEntrenamiento.crear(5, 'Fuerza', null, [rutina()]).indicaciones,
