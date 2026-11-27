@@ -19,7 +19,9 @@ import { SeriesController } from './application/controllers/series.controller';
 import { SesionesController } from './application/controllers/sesiones.controller';
 import { SesionesQueryService } from './application/queries/sesiones-query.service';
 import { CalculadoraProgreso } from './domain/services/calculadora-progreso.service';
+import { CalculadoraResumen } from './domain/services/calculadora-resumen.service';
 import { ProgresoQueryService } from './application/queries/progreso.query-service';
+import { ResumenProgresoQueryService } from './application/queries/resumen-progreso-query.service';
 import { ProgresoController } from './application/controllers/progreso.controller';
 
 @Module({})
@@ -50,7 +52,9 @@ export class RegistroModule {
         CorregirSerieUseCase,
         SesionesQueryService,
         CalculadoraProgreso,
+        CalculadoraResumen,
         ProgresoQueryService,
+        ResumenProgresoQueryService,
       ],
       exports: [ISesionEntrenamientoRepositoryToken],
     };

@@ -35,4 +35,26 @@ describe('ProgresoMapper (US-19)', () => {
       por_fecha: [],
     });
   });
+
+  it('traduce el resumen a snake_case sin cambiar los valores', () => {
+    const dto = ProgresoMapper.aResumenDto({
+      desde: '2026-10-19',
+      hasta: '2026-10-25',
+      records: 1,
+      volumen: 1020,
+      volumenAnterior: 1440,
+      sesiones: 2,
+      series: 4,
+    });
+
+    expect(dto).toEqual({
+      desde: '2026-10-19',
+      hasta: '2026-10-25',
+      records: 1,
+      volumen: 1020,
+      volumen_anterior: 1440,
+      sesiones: 2,
+      series: 4,
+    });
+  });
 });

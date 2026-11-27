@@ -29,3 +29,15 @@ export class EjercicioConProgresoResponseDto {
   id: number;
   nombre: string;
 }
+
+// GET /api/progreso/resumen: la semana de hoy (lunes a domingo), todos los ejercicios juntos.
+// Sin series en la semana, todo en 0.
+export class ResumenProgresoResponseDto {
+  desde: string; // lunes, YYYY-MM-DD
+  hasta: string; // domingo, YYYY-MM-DD
+  records: number;
+  volumen: number; // kg
+  volumen_anterior: number; // kg, la semana anterior
+  sesiones: number;
+  series: number;
+}

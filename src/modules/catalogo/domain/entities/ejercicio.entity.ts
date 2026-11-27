@@ -47,3 +47,5 @@ export class Ejercicio {
   @Column({ type: 'enum', enum: Subgrupo, nullable: true })
   subgrupo: Subgrupo | null;
 }
+
+

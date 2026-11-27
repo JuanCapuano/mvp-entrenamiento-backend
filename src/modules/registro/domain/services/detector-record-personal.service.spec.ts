@@ -59,4 +59,60 @@ describe('DetectorRecordPersonal (RN9)', () => {
     );
     expect(detector.superaRecord(nueva, [serie(60, 8)])).toBe(false);
   });
+
+  describe('seriesRecord: qué series del historial fueron récord cuando se registraron', () => {
+    const SENTADILLA = 1;
+    const PRESS_BANCA = 4;
+    // El id es el orden en que se registró (RN12)
+    const registrada = (
+      id: number,
+      ejercicioId: number,
+      peso: number,
+      reps: number,
+    ) =>
+      Object.assign(
+        new Serie(
+          ejercicioId,
+          1,
+          Peso.crear(peso),
+          Repeticiones.crear(reps),
+          RIR.crear(2),
+        ),
+        { id },
+      );
+
+    it('E8: 60 × 8 (14/10) y después 65 × 8 (21/10): solo la segunda es récord', () => {
+      expect(
+        detector.seriesRecord([
+          registrada(1, SENTADILLA, 60, 8),
+          registrada(2, SENTADILLA, 65, 8),
+        ]),
+      ).toEqual(new Set([2]));
+    });
+
+    it('mide cada serie contra las anteriores por id, aunque lleguen desordenadas', () => {
+      expect(
+        detector.seriesRecord([
+          registrada(3, SENTADILLA, 62.5, 8),
+          registrada(1, SENTADILLA, 60, 8),
+          registrada(2, SENTADILLA, 65, 8),
+        ]),
+      ).toEqual(new Set([2]));
+    });
+
+    it('cada ejercicio tiene su propio historial', () => {
+      expect(
+        detector.seriesRecord([
+          registrada(1, SENTADILLA, 60, 8),
+          registrada(2, PRESS_BANCA, 50, 10),
+          registrada(3, SENTADILLA, 62.5, 8),
+          registrada(4, PRESS_BANCA, 52.5, 8),
+        ]),
+      ).toEqual(new Set([3, 4]));
+    });
+
+    it('sin historial no hay récords', () => {
+      expect(detector.seriesRecord([])).toEqual(new Set());
+    });
+  });
 });
