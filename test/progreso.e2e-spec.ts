@@ -211,6 +211,11 @@ describe('Progreso del deportista (US-19)', () => {
     return token ? peticion.auth(token, { type: 'bearer' }) : peticion;
   }
 
+  function resumen(token: string | null) {
+    const peticion = request(app.getHttpServer()).get('/api/progreso/resumen');
+    return token ? peticion.auth(token, { type: 'bearer' }) : peticion;
+  }
+
   function ejerciciosConProgreso(token: string) {
     return request(app.getHttpServer())
       .get('/api/progreso/ejercicios')
@@ -298,6 +303,62 @@ describe('Progreso del deportista (US-19)', () => {
 
     it('un entrenador no puede consultar este endpoint: 403', async () => {
       await progreso(tokenLaura, SENTADILLA).expect(403);
+    });
+  });
+
+  describe('GET /api/progreso/resumen', () => {
+    it('hoy 21/10: récords, volumen de esta semana y de la anterior, sesiones y series', async () => {
+      // Semana anterior (12 al 18/10)
+      await guardarSesion(JUAN_ID, PIERNAS, '2026-10-14', [
+        [SENTADILLA, 60, 8, 2],
+        [SENTADILLA, 60, 8, 2],
+        [SENTADILLA, 60, 8, 2],
+      ]);
+      // Esta semana (19 al 25/10): 65 × 8 supera los 60 × 8; el press es la primera vez
+      await guardarSesion(JUAN_ID, PIERNAS, HOY, [[SENTADILLA, 65, 8, 1]]);
+      await guardarSesion(JUAN_ID, TORSO, HOY, [[PRESS_BANCA, 50, 10, 2]]);
+
+      const respuesta = await resumen(tokenJuan).expect(200);
+
+      expect(respuesta.body).toEqual({
+        desde: '2026-10-19',
+        hasta: '2026-10-25',
+        records: 1,
+        volumen: 1020,
+        volumen_anterior: 1440,
+        sesiones: 2,
+        series: 2,
+      });
+    });
+
+    it('sin series registradas: todo en 0', async () => {
+      const respuesta = await resumen(tokenSofia).expect(200);
+
+      expect(respuesta.body).toEqual({
+        desde: '2026-10-19',
+        hasta: '2026-10-25',
+        records: 0,
+        volumen: 0,
+        volumen_anterior: 0,
+        sesiones: 0,
+        series: 0,
+      });
+    });
+
+    it('RN17: el deportista solo ve sus propias series', async () => {
+      await guardarSesion(SOFIA_ID, PIERNAS, HOY, [[SENTADILLA, 100, 5, 0]]);
+
+      const respuesta = await resumen(tokenJuan).expect(200);
+
+      expect(respuesta.body.series).toBe(0);
+    });
+
+    it('E13: sin token responde 401', async () => {
+      await resumen(null).expect(401);
+    });
+
+    it('un entrenador no puede consultar este endpoint: 403', async () => {
+      await resumen(tokenLaura).expect(403);
     });
   });
 

@@ -1,7 +1,24 @@
 import type { ProgresoDelEjercicio } from '../domain/services/calculadora-progreso.service';
-import type { ProgresoResponseDto } from '../dto/progreso-response.dto';
+import type { ResumenDeLaSemana } from '../domain/services/calculadora-resumen.service';
+import type {
+  ProgresoResponseDto,
+  ResumenProgresoResponseDto,
+} from '../dto/progreso-response.dto';
 
 export class ProgresoMapper {
+  // Solo traduce nombres: los valores ya los calculó CalculadoraResumen
+  static aResumenDto(resumen: ResumenDeLaSemana): ResumenProgresoResponseDto {
+    return {
+      desde: resumen.desde,
+      hasta: resumen.hasta,
+      records: resumen.records,
+      volumen: resumen.volumen,
+      volumen_anterior: resumen.volumenAnterior,
+      sesiones: resumen.sesiones,
+      series: resumen.series,
+    };
+  }
+
   // Solo traduce nombres (camelCase → snake_case): los valores ya los calculó CalculadoraProgreso
   static aDto(progreso: ProgresoDelEjercicio): ProgresoResponseDto {
     return {

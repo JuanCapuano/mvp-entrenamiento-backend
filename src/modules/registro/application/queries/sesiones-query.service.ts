@@ -94,10 +94,9 @@ export class SesionesQueryService {
     );
   }
 
-  // Ids de las series que, cuando se registraron, superaron a todas las anteriores del ejercicio
-  // (RN9). Se mira todo el historial del deportista, no solo el rango pedido: una serie del rango
-  // puede haber superado una marca de antes. Las series se registran siempre el día de hoy (RN12),
-  // así que el orden de id es el orden en que se hicieron.
+  // Ids de las series que fueron récord personal cuando se registraron (RN9, lo decide
+  // DetectorRecordPersonal). Se mira todo el historial de cada ejercicio, no solo el rango pedido:
+  // una serie del rango puede haber superado una marca de antes.
   private async buscarSeriesRecord(
     deportistaId: number,
     sesiones: SesionEntrenamiento[],
@@ -118,16 +117,7 @@ export class SesionesQueryService {
       ),
     );
 
-    const records = new Set<number>();
-    for (const historial of historiales) {
-      const enOrden = [...historial].sort((a, b) => a.id - b.id);
-      enOrden.forEach((serie, i) => {
-        if (this.detectorRecord.superaRecord(serie, enOrden.slice(0, i))) {
-          records.add(serie.id);
-        }
-      });
-    }
-    return records;
+    return this.detectorRecord.seriesRecord(historiales.flat());
   }
 
   // Rutina (nombre y dosificaciones) de cada sesión, por id de rutina. Puede ser de un plan que
