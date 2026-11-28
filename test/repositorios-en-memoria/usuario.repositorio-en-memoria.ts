@@ -25,6 +25,8 @@ export class UsuarioRepositorioEnMemoria implements IUsuarioRepository {
   }
 
   guardar(usuario: Usuario): Promise<Usuario> {
+    // Como el autoincremental de MySQL: un usuario nuevo recibe el próximo id
+    usuario.id ??= Math.max(0, ...this.usuarios.keys()) + 1;
     this.usuarios.set(usuario.id, copiar(usuario));
     return Promise.resolve(usuario);
   }

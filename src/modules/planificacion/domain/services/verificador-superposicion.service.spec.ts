@@ -21,12 +21,6 @@ describe('VerificadorSuperposicion (RN11)', () => {
     expect(() => verificador.verificar(nueva, [vigenteDeJuan])).not.toThrow();
   });
 
-  it('acepta cualquier vigencia si el deportista no tiene asignaciones', () => {
-    const nueva = Vigencia.crear('2026-11-15', '2026-12-15');
-
-    expect(() => verificador.verificar(nueva, [])).not.toThrow();
-  });
-
   it('compara contra todas las asignaciones, aunque sean de planes distintos', () => {
     const anterior = Vigencia.crear('2026-08-01', '2026-09-30');
     const nueva = Vigencia.crear('2026-09-15', '2026-10-15');

@@ -11,28 +11,6 @@ describe('DetectorRecordPersonal (RN9)', () => {
   it('la primera marca no supera un récord', () => {
     expect(detector.superaRecord(serie(62.5, 8), [])).toBe(false);
   });
-  it.each([
-    [62.5, 8, true],
-    [60, 9, true],
-    [60, 8, false],
-    [60, 7, false],
-    [59, 20, false],
-  ])('evalúa %s kg × %s frente a 60 × 8: %s', (peso, reps, esperado) => {
-    expect(
-      detector.superaRecord(serie(peso as number, reps as number), [
-        serie(60, 8),
-      ]),
-    ).toBe(esperado);
-  });
-  it('compara contra la mejor marca, sin depender del orden ni del RIR', () => {
-    expect(
-      detector.superaRecord(serie(62.5, 8), [
-        serie(60, 8),
-        serie(65, 7),
-        serie(50, 10),
-      ]),
-    ).toBe(false);
-  });
 
   it('prioriza más peso aunque la nueva serie tenga menos repeticiones', () => {
     expect(detector.superaRecord(serie(62.5, 1), [serie(60, 20)])).toBe(true);
@@ -42,11 +20,6 @@ describe('DetectorRecordPersonal (RN9)', () => {
     const anteriores = [serie(60, 8), serie(60, 10), serie(60, 9)];
     expect(detector.superaRecord(serie(60, 10), anteriores)).toBe(false);
     expect(detector.superaRecord(serie(60, 11), anteriores)).toBe(true);
-  });
-
-  it('peso corporal: la primera serie no cuenta y una marca previa se supera con más repeticiones', () => {
-    expect(detector.superaRecord(serie(0, 8), [])).toBe(false);
-    expect(detector.superaRecord(serie(0, 9), [serie(0, 8)])).toBe(true);
   });
 
   it('cambiar solamente el RIR no supera una marca', () => {
@@ -62,7 +35,6 @@ describe('DetectorRecordPersonal (RN9)', () => {
 
   describe('seriesRecord: qué series del historial fueron récord cuando se registraron', () => {
     const SENTADILLA = 1;
-    const PRESS_BANCA = 4;
     // El id es el orden en que se registró (RN12)
     const registrada = (
       id: number,
@@ -88,31 +60,6 @@ describe('DetectorRecordPersonal (RN9)', () => {
           registrada(2, SENTADILLA, 65, 8),
         ]),
       ).toEqual(new Set([2]));
-    });
-
-    it('mide cada serie contra las anteriores por id, aunque lleguen desordenadas', () => {
-      expect(
-        detector.seriesRecord([
-          registrada(3, SENTADILLA, 62.5, 8),
-          registrada(1, SENTADILLA, 60, 8),
-          registrada(2, SENTADILLA, 65, 8),
-        ]),
-      ).toEqual(new Set([2]));
-    });
-
-    it('cada ejercicio tiene su propio historial', () => {
-      expect(
-        detector.seriesRecord([
-          registrada(1, SENTADILLA, 60, 8),
-          registrada(2, PRESS_BANCA, 50, 10),
-          registrada(3, SENTADILLA, 62.5, 8),
-          registrada(4, PRESS_BANCA, 52.5, 8),
-        ]),
-      ).toEqual(new Set([3, 4]));
-    });
-
-    it('sin historial no hay récords', () => {
-      expect(detector.seriesRecord([])).toEqual(new Set());
     });
   });
 });

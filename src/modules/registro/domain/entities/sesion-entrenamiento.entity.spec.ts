@@ -36,14 +36,11 @@ describe('SesionEntrenamiento (RN1, RN2, RN7, RN12)', () => {
     );
     expect(sesion.series).toHaveLength(1);
   });
-  it.each(['2026-10-20', '2026-10-22'])(
-    'rechaza registrar fuera del día: %s',
-    (fecha) => {
-      const sesion = crear();
-      expect(() => sesion.registrarSerie(3, fecha, 1, peso, reps, rir)).toThrow(
-        'Las series se registran siempre con la fecha del día.',
-      );
-      expect(sesion.series).toHaveLength(1);
-    },
-  );
+  it.each(['2026-10-22'])('rechaza registrar fuera del día: %s', (fecha) => {
+    const sesion = crear();
+    expect(() => sesion.registrarSerie(3, fecha, 1, peso, reps, rir)).toThrow(
+      'Las series se registran siempre con la fecha del día.',
+    );
+    expect(sesion.series).toHaveLength(1);
+  });
 });

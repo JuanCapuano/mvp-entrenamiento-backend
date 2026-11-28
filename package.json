@@ -17,6 +17,7 @@
     "test": "node --experimental-vm-modules --no-warnings=ExperimentalWarning node_modules/jest/bin/jest.js",
     "test:watch": "yarn test --watch",
     "test:cov": "yarn test --coverage",
+    "test:cov:all": "yarn test --coverage --testRegex \".*\\.(e2e-)?spec\\.ts$\"",
     "test:debug": "node --experimental-vm-modules --inspect-brk node_modules/jest/bin/jest.js --runInBand",
     "test:e2e": "yarn test --config ./test/jest-e2e.json"
   },
